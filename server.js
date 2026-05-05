@@ -11,22 +11,24 @@ const PORT = process.env.PORT || 3000;
 // 🔐 ENV VARIABLES
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_KEY;
-const ADMIN_SECRET = process.env.ADMIN_SECRET; // 🔥 جديد
+const ADMIN_SECRET = process.env.ADMIN_SECRET;
 
 // 🔗 Connect Supabase
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Middlewares
+// =============================
+// 🧱 MIDDLEWARES
+// =============================
 app.use(cors());
 app.use(express.json());
 
 // =============================
-// 🔐 ADMIN PROTECTION (🔥 مهم)
+// 🔐 ADMIN PROTECTION (مهم جدًا)
 // =============================
 app.use("/admin", (req, res, next) => {
   const key = req.query.key;
 
-  if (key !== ADMIN_SECRET) {
+  if (!key || key !== ADMIN_SECRET) {
     return res.status(403).send("Access Denied");
   }
 
@@ -34,7 +36,7 @@ app.use("/admin", (req, res, next) => {
 });
 
 // =============================
-// 🌐 Serve frontend
+// 🌐 SERVE STATIC FILES
 // =============================
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -42,85 +44,97 @@ app.use(express.static(path.join(__dirname, "public")));
 // 📌 REGISTER CHANNEL
 // =============================
 app.post("/api/channels/register", async (req, res) => {
-  const { channel, email, discord } = req.body;
+  try {
+    const { channel, email, discord } = req.body;
 
-  if (!channel || !email) {
-    return res.status(400).json({ error: "Missing data" });
+    if (!channel || !email) {
+      return res.status(400).json({ error: "Missing data" });
+    }
+
+    const { error } = await supabase
+      .from("channels")
+      .insert([{ channel, email, discord, status: "pending" }]);
+
+    if (error) throw error;
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
   }
-
-  const { error } = await supabase
-    .from("channels")
-    .insert([{ channel, email, discord }]);
-
-  if (error) {
-    return res.status(500).json({ error: error.message });
-  }
-
-  res.json({ success: true });
 });
 
 // =============================
 // 📌 GET ALL CHANNELS (ADMIN)
 // =============================
 app.get("/api/channels", async (req, res) => {
-  const { data, error } = await supabase
-    .from("channels")
-    .select("*")
-    .order("created_at", { ascending: false });
+  try {
+    const { data, error } = await supabase
+      .from("channels")
+      .select("*")
+      .order("created_at", { ascending: false });
 
-  if (error) {
-    return res.status(500).json({ error: error.message });
+    if (error) throw error;
+
+    res.json(data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
   }
-
-  res.json(data);
 });
 
 // =============================
 // ✅ APPROVE CHANNEL
 // =============================
 app.post("/api/channels/approve", async (req, res) => {
-  const { id } = req.body;
+  try {
+    const { id } = req.body;
 
-  const { error } = await supabase
-    .from("channels")
-    .update({ status: "approved" })
-    .eq("id", id);
+    const { error } = await supabase
+      .from("channels")
+      .update({ status: "approved" })
+      .eq("id", id);
 
-  if (error) {
-    return res.status(500).json({ error: error.message });
+    if (error) throw error;
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
   }
-
-  res.json({ success: true });
 });
 
 // =============================
 // ❌ REJECT CHANNEL
 // =============================
 app.post("/api/channels/reject", async (req, res) => {
-  const { id } = req.body;
+  try {
+    const { id } = req.body;
 
-  const { error } = await supabase
-    .from("channels")
-    .update({ status: "rejected" })
-    .eq("id", id);
+    const { error } = await supabase
+      .from("channels")
+      .update({ status: "rejected" })
+      .eq("id", id);
 
-  if (error) {
-    return res.status(500).json({ error: error.message });
+    if (error) throw error;
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
   }
-
-  res.json({ success: true });
 });
 
 // =============================
-// 🌐 ADMIN PAGE
+// 🌐 ADMIN PAGE (مصحح)
 // =============================
 app.get("/admin", (req, res) => {
-  res.sendFile(path.join(__dirname, "public/admin.html"));
+  res.sendFile(path.join(__dirname, "public", "admin.html"));
 });
 
 // =============================
 // 🚀 START SERVER
 // =============================
 app.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
+  console.log("🔥 Server running on port " + PORT);
 });
