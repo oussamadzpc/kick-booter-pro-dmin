@@ -1,4 +1,4 @@
-// 🔥 CHANNEL SYSTEM WITH SUPABASE
+// 🔥 CHANNEL SYSTEM WITH SUPABASE (FULL VERSION)
 
 const express = require("express");
 const cors = require("cors");
@@ -23,7 +23,7 @@ app.use(cors());
 app.use(express.json());
 
 // =============================
-// 🔐 ADMIN PROTECTION (مهم جدًا)
+// 🔐 ADMIN PROTECTION
 // =============================
 app.use("/admin", (req, res, next) => {
   const key = req.query.key;
@@ -126,7 +126,31 @@ app.post("/api/channels/reject", async (req, res) => {
 });
 
 // =============================
-// 🌐 ADMIN PAGE (مصحح)
+// 🔍 CHECK USER STATUS (🔥 جديد)
+// =============================
+app.post("/api/channels/status", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const { data, error } = await supabase
+      .from("channels")
+      .select("status")
+      .eq("email", email)
+      .single();
+
+    if (error || !data) {
+      return res.json({ status: "not_found" });
+    }
+
+    res.json({ status: data.status });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// =============================
+// 🌐 ADMIN PAGE
 // =============================
 app.get("/admin", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "admin.html"));
