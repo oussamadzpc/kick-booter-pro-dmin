@@ -8,9 +8,10 @@ const { createClient } = require("@supabase/supabase-js");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// 🔐 ENV VARIABLES (ضعها في Render)
+// 🔐 ENV VARIABLES
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_KEY;
+const ADMIN_SECRET = process.env.ADMIN_SECRET; // 🔥 جديد
 
 // 🔗 Connect Supabase
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -19,7 +20,22 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 app.use(cors());
 app.use(express.json());
 
-// Serve frontend
+// =============================
+// 🔐 ADMIN PROTECTION (🔥 مهم)
+// =============================
+app.use("/admin", (req, res, next) => {
+  const key = req.query.key;
+
+  if (key !== ADMIN_SECRET) {
+    return res.status(403).send("Access Denied");
+  }
+
+  next();
+});
+
+// =============================
+// 🌐 Serve frontend
+// =============================
 app.use(express.static(path.join(__dirname, "public")));
 
 // =============================
@@ -96,7 +112,7 @@ app.post("/api/channels/reject", async (req, res) => {
 });
 
 // =============================
-// 🌐 ROUTES
+// 🌐 ADMIN PAGE
 // =============================
 app.get("/admin", (req, res) => {
   res.sendFile(path.join(__dirname, "public/admin.html"));
