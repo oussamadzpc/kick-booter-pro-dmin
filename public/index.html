@@ -5,6 +5,15 @@
   <title>Kick Booster Pro</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+  <!-- 🔥 Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-9219B9W27K"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-9219B9W27K');
+  </script>
+
   <style>
     body {
       margin: 0;
@@ -88,7 +97,9 @@
 
   <div id="statusBox" class="status"></div>
 
-  <a id="downloadBtn" href="https://www.mediafire.com/file/zjdcfsyhvckpfx0/kick-extension-pro-fixed-v4.zip/file">
+  <a id="downloadBtn"
+     href="https://www.mediafire.com/file/zjdcfsyhvckpfx0/kick-extension-pro-fixed-v4.zip/file"
+     onclick="trackDownload()">
     <button>تحميل الاكستنشن</button>
   </a>
 </div>
@@ -122,7 +133,12 @@ async function register() {
     body: JSON.stringify({ channel, email, discord })
   });
 
-  localStorage.setItem("email", email); // 🔐 حفظ الإيميل
+  // 🔥 تتبع التسجيل
+  gtag('event', 'register', {
+    method: 'website'
+  });
+
+  localStorage.setItem("email", email);
 
   checkStatus(email);
 }
@@ -160,6 +176,11 @@ function updateUI(status) {
     box.className = "status approved";
     box.innerText = "✅ تم القبول";
     btn.style.display = "block";
+
+    // 🔥 تتبع القبول
+    gtag('event', 'approved_user', {
+      status: 'approved'
+    });
   }
 
   else if (status === "rejected") {
@@ -172,6 +193,15 @@ function updateUI(status) {
     box.style.display = "none";
     btn.style.display = "none";
   }
+}
+
+// ==========================
+// 🔥 تتبع التحميل
+// ==========================
+function trackDownload() {
+  gtag('event', 'download_extension', {
+    event_category: 'engagement'
+  });
 }
 
 // ==========================
