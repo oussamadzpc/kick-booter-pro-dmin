@@ -1,38 +1,187 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-<meta charset="UTF-8">
-<title>Register Channel</title>
+  <meta charset="UTF-8" />
+  <title>Kick Booster Pro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #0f172a, #020617);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(10px);
+      padding: 30px;
+      border-radius: 15px;
+      width: 350px;
+      text-align: center;
+      box-shadow: 0 0 30px rgba(0,0,0,0.4);
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: none;
+      background: #22c55e;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #16a34a;
+    }
+
+    .status {
+      margin-top: 20px;
+      padding: 10px;
+      border-radius: 10px;
+      display: none;
+    }
+
+    .pending { background: #f59e0b; }
+    .approved { background: #22c55e; }
+    .rejected { background: #ef4444; }
+
+    #downloadBtn {
+      display: none;
+      margin-top: 15px;
+      background: #3b82f6;
+    }
+  </style>
 </head>
 
 <body>
 
-<h2>تسجيل قناة</h2>
+<div class="container">
+  <h1>🚀 Kick Booster</h1>
 
-<input id="channel" placeholder="اسم القناة"><br>
-<input id="email" placeholder="الإيميل"><br>
-<input id="discord" placeholder="Discord"><br>
+  <input id="channel" placeholder="اسم القناة" />
+  <input id="email" placeholder="الإيميل" />
+  <input id="discord" placeholder="ديسكورد" />
 
-<button onclick="submit()">إرسال</button>
+  <button onclick="register()">تسجيل</button>
 
-<p id="msg"></p>
+  <div id="statusBox" class="status"></div>
+
+  <a id="downloadBtn" href="PUT_YOUR_EXTENSION_LINK_HERE">
+    <button>تحميل الاكستنشن</button>
+  </a>
+</div>
 
 <script>
-function submit(){
-  fetch('/api/channels/register',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({
-      channel: document.getElementById('channel').value,
-      email: document.getElementById('email').value,
-      discord: document.getElementById('discord').value
-    })
-  })
-  .then(res=>res.json())
-  .then(()=>{
-    document.getElementById('msg').innerText = "تم الإرسال ✅";
-  });
+
+let savedEmail = localStorage.getItem("email");
+
+// 🔐 تحميل الإيميل تلقائي
+if (savedEmail) {
+  document.getElementById("email").value = savedEmail;
+  checkStatus(savedEmail);
 }
+
+// ==========================
+// 📌 تسجيل
+// ==========================
+async function register() {
+  const channel = document.getElementById("channel").value;
+  const email = document.getElementById("email").value;
+  const discord = document.getElementById("discord").value;
+
+  if (!channel || !email) {
+    alert("املأ البيانات");
+    return;
+  }
+
+  await fetch("/api/channels/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ channel, email, discord })
+  });
+
+  localStorage.setItem("email", email); // 🔐 حفظ الإيميل
+
+  checkStatus(email);
+}
+
+// ==========================
+// 🔍 فحص الحالة
+// ==========================
+async function checkStatus(email) {
+  const res = await fetch("/api/channels/status", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email })
+  });
+
+  const data = await res.json();
+  updateUI(data.status);
+}
+
+// ==========================
+// 🎨 تحديث الواجهة
+// ==========================
+function updateUI(status) {
+  const box = document.getElementById("statusBox");
+  const btn = document.getElementById("downloadBtn");
+
+  box.style.display = "block";
+
+  if (status === "pending") {
+    box.className = "status pending";
+    box.innerText = "⏳ قيد المراجعة";
+    btn.style.display = "none";
+  }
+
+  else if (status === "approved") {
+    box.className = "status approved";
+    box.innerText = "✅ تم القبول";
+    btn.style.display = "block";
+  }
+
+  else if (status === "rejected") {
+    box.className = "status rejected";
+    box.innerText = "❌ تم الرفض";
+    btn.style.display = "none";
+  }
+
+  else {
+    box.style.display = "none";
+    btn.style.display = "none";
+  }
+}
+
+// ==========================
+// ⚡ تحديث تلقائي كل 5 ثواني
+// ==========================
+setInterval(() => {
+  const email = localStorage.getItem("email");
+  if (email) checkStatus(email);
+}, 5000);
+
 </script>
 
 </body>
