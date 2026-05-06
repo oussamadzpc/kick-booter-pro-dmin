@@ -1,4 +1,4 @@
-// 🔥 FINAL SECURE CHANNEL SYSTEM (FULL VERSION)
+// 🔥 FINAL SECURE CHANNEL SYSTEM (PRO VERSION)
 
 const express = require("express");
 const cors = require("cors");
@@ -41,7 +41,7 @@ app.use("/admin", (req, res, next) => {
 app.use(express.static(path.join(__dirname, "public")));
 
 // =============================
-// 📌 REGISTER CHANNEL (FIXED)
+// 📌 REGISTER CHANNEL
 // =============================
 app.post("/api/channels/register", async (req, res) => {
   try {
@@ -64,7 +64,13 @@ app.post("/api/channels/register", async (req, res) => {
 
     const { error } = await supabase
       .from("channels")
-      .insert([{ channel, email, discord, status: "pending" }]);
+      .insert([{
+        channel,
+        email,
+        discord,
+        status: "pending",
+        hidden: false
+      }]);
 
     if (error) throw error;
 
@@ -77,13 +83,14 @@ app.post("/api/channels/register", async (req, res) => {
 });
 
 // =============================
-// 📌 GET ALL CHANNELS (ADMIN)
+// 📌 GET CHANNELS (FILTER HIDDEN)
 // =============================
 app.get("/api/channels", async (req, res) => {
   try {
     const { data, error } = await supabase
       .from("channels")
       .select("*")
+      .eq("hidden", false) // 🔥 مهم جداً
       .order("created_at", { ascending: false });
 
     if (error) throw error;
@@ -138,7 +145,29 @@ app.post("/api/channels/reject", async (req, res) => {
 });
 
 // =============================
-// 🔍 CHECK STATUS (FIXED)
+// 🗑️ HIDE CHANNEL (NEW)
+// =============================
+app.post("/api/channels/hide", async (req, res) => {
+  try {
+    const { id } = req.body;
+
+    const { error } = await supabase
+      .from("channels")
+      .update({ hidden: true })
+      .eq("id", id);
+
+    if (error) throw error;
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// =============================
+// 🔍 CHECK STATUS
 // =============================
 app.post("/api/channels/status", async (req, res) => {
   try {
