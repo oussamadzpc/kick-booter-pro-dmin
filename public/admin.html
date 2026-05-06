@@ -1,63 +1,197 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-<meta charset="UTF-8">
-<title>Admin Panel</title>
+<meta charset="UTF-8" />
+<title>لوحة التحكم</title>
+
+<style>
+body{
+  margin:0;
+  font-family: 'Segoe UI', sans-serif;
+  background: radial-gradient(circle at top, #0f172a, #020617);
+  color:white;
+}
+
+.container{
+  max-width:1200px;
+  margin:auto;
+  padding:30px;
+}
+
+h1{
+  text-align:center;
+  margin-bottom:20px;
+}
+
+.top-bar{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:20px;
+}
+
+input{
+  padding:10px;
+  border-radius:10px;
+  border:none;
+  width:250px;
+}
+
+.stats{
+  display:flex;
+  gap:10px;
+}
+
+.card{
+  padding:10px 15px;
+  border-radius:10px;
+  background:rgba(255,255,255,0.05);
+}
+
+.table{
+  width:100%;
+  border-collapse:collapse;
+  overflow:hidden;
+  border-radius:15px;
+  background:rgba(255,255,255,0.05);
+}
+
+.table th, .table td{
+  padding:12px;
+  text-align:center;
+}
+
+.table tr{
+  border-bottom:1px solid rgba(255,255,255,0.1);
+}
+
+.status{
+  padding:5px 10px;
+  border-radius:8px;
+  font-size:12px;
+}
+
+.pending{ background:orange; }
+.approved{ background:green; }
+.rejected{ background:red; }
+
+button{
+  border:none;
+  padding:6px 10px;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+.approve{ background:#22c55e; }
+.reject{ background:#ef4444; }
+
+</style>
 </head>
 
 <body>
 
-<h2>لوحة التحكم</h2>
+<div class="container">
 
-<table border="1" id="table">
+<h1>🚀 لوحة التحكم الاحترافية</h1>
+
+<div class="top-bar">
+  <input id="search" placeholder="بحث..." oninput="render()" />
+
+  <div class="stats">
+    <div class="card">⏳ <span id="pendingCount">0</span></div>
+    <div class="card">✅ <span id="approvedCount">0</span></div>
+    <div class="card">❌ <span id="rejectedCount">0</span></div>
+  </div>
+</div>
+
+<table class="table">
+<thead>
 <tr>
 <th>القناة</th>
 <th>الإيميل</th>
+<th>ديسكورد</th>
 <th>الحالة</th>
 <th>تحكم</th>
 </tr>
+</thead>
+<tbody id="table"></tbody>
 </table>
+
+</div>
 
 <script>
 
-function load(){
-  fetch('/api/channels')
-  .then(res=>res.json())
-  .then(data=>{
-    const table = document.getElementById('table');
+let channels = [];
 
-    data.forEach(c=>{
-      const row = document.createElement('tr');
+async function load(){
+  const res = await fetch('/api/channels');
+  channels = await res.json();
+  render();
+}
 
-      row.innerHTML = `
-        <td>${c.channel}</td>
-        <td>${c.email}</td>
-        <td>${c.status}</td>
-        <td>
-          <button onclick="approve('${c.id}')">✔</button>
-          <button onclick="reject('${c.id}')">✖</button>
-        </td>
-      `;
+function render(){
+  const table = document.getElementById('table');
+  const search = document.getElementById('search').value.toLowerCase();
 
-      table.appendChild(row);
-    });
+  table.innerHTML = '';
+
+  let pending=0, approved=0, rejected=0;
+
+  channels
+  .filter(c => 
+    c.channel.toLowerCase().includes(search) ||
+    c.email.toLowerCase().includes(search)
+  )
+  .forEach(c=>{
+    if(c.status==='pending') pending++;
+    if(c.status==='approved') approved++;
+    if(c.status==='rejected') rejected++;
+
+    const row = document.createElement('tr');
+
+    row.innerHTML = `
+      <td>${c.channel}</td>
+      <td>${c.email}</td>
+      <td>${c.discord || '-'}</td>
+      <td><span class="status ${c.status}">${c.status}</span></td>
+      <td>
+        <button class="approve" onclick="approve('${c.id}')">✔</button>
+        <button class="reject" onclick="reject('${c.id}')">✖</button>
+      </td>
+    `;
+
+    table.appendChild(row);
   });
+
+  document.getElementById('pendingCount').innerText = pending;
+  document.getElementById('approvedCount').innerText = approved;
+  document.getElementById('rejectedCount').innerText = rejected;
 }
 
-function approve(id){
-  fetch('/api/channels/approve',{
+async function approve(id){
+  await fetch('/api/channels/approve',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body: JSON.stringify({id})
-  }).then(()=> location.reload());
+  });
+
+  // تحديث محلي بدون reload 🔥
+  const c = channels.find(x=>x.id===id);
+  if(c) c.status = 'approved';
+
+  render();
 }
 
-function reject(id){
-  fetch('/api/channels/reject',{
+async function reject(id){
+  await fetch('/api/channels/reject',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body: JSON.stringify({id})
-  }).then(()=> location.reload());
+  });
+
+  const c = channels.find(x=>x.id===id);
+  if(c) c.status = 'rejected';
+
+  render();
 }
 
 load();
