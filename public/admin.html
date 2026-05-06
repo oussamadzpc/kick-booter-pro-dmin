@@ -27,7 +27,7 @@ body{
   text-align:center;
 }
 
-input{
+input, select{
   padding:10px;
   margin:10px;
   border-radius:10px;
@@ -43,6 +43,9 @@ input{
 table{
   width:100%;
   border-collapse:collapse;
+  background:#0f172a;
+  border-radius:10px;
+  overflow:hidden;
 }
 
 td,th{
@@ -50,9 +53,13 @@ td,th{
   text-align:center;
 }
 
+tr:nth-child(even){
+  background:#020617;
+}
+
 .pending{color:orange;}
-.approved{color:green;}
-.rejected{color:red;}
+.approved{color:#22c55e;}
+.rejected{color:#ef4444;}
 
 button{
   padding:5px 10px;
@@ -61,12 +68,19 @@ button{
   cursor:pointer;
 }
 
-.approve{background:green;}
-.reject{background:red;}
+.approve{background:#22c55e;}
+.reject{background:#ef4444;}
+.hide{background:gray;}
 
 .top{
   display:flex;
   justify-content:space-between;
+  flex-wrap:wrap;
+}
+
+.filters{
+  display:flex;
+  gap:10px;
 }
 </style>
 </head>
@@ -88,6 +102,18 @@ button{
 
 <div class="top">
   <h2>🚀 لوحة التحكم</h2>
+
+  <div class="filters">
+    <input id="search" placeholder="بحث..." oninput="render()" />
+
+    <select id="filter" onchange="render()">
+      <option value="all">الكل</option>
+      <option value="pending">Pending</option>
+      <option value="approved">Approved</option>
+      <option value="rejected">Rejected</option>
+    </select>
+  </div>
+
   <div>طلبات: <span id="count">0</span></div>
 </div>
 
@@ -98,6 +124,7 @@ button{
 <th>الإيميل</th>
 <th>ديسكورد</th>
 <th>الحالة</th>
+<th>التاريخ</th>
 <th>تحكم</th>
 </tr>
 </thead>
@@ -110,7 +137,7 @@ button{
 
 <script>
 
-const ADMIN_PASS = "2107"; // غيرها ❗
+const ADMIN_PASS = "2107";
 
 let channels = [];
 
@@ -135,26 +162,44 @@ async function load(){
 
 function render(){
   const table = document.getElementById('table');
+  const search = document.getElementById('search').value.toLowerCase();
+  const filter = document.getElementById('filter').value;
+
   table.innerHTML='';
 
-  channels.forEach(c=>{
+  let count = 0;
+
+  channels
+  .filter(c =>
+    (filter === "all" || c.status === filter) &&
+    (
+      c.channel.toLowerCase().includes(search) ||
+      c.email.toLowerCase().includes(search)
+    )
+  )
+  .forEach(c=>{
+
     const row = document.createElement('tr');
+    const date = new Date(c.created_at).toLocaleString();
 
     row.innerHTML = `
       <td>${c.channel}</td>
       <td>${c.email}</td>
       <td>${c.discord || '-'}</td>
       <td class="${c.status}">${c.status}</td>
+      <td>${date}</td>
       <td>
         <button class="approve" onclick="approve('${c.id}')">✔</button>
         <button class="reject" onclick="reject('${c.id}')">✖</button>
+        <button class="hide" onclick="hideRow('${c.id}')">🗑</button>
       </td>
     `;
 
     table.appendChild(row);
+    count++;
   });
 
-  document.getElementById('count').innerText = channels.length;
+  document.getElementById('count').innerText = count;
 }
 
 async function approve(id){
@@ -164,10 +209,7 @@ async function approve(id){
     body: JSON.stringify({id})
   });
 
-  const c = channels.find(x=>x.id===id);
-  if(c) c.status = 'approved';
-
-  render();
+  updateLocal(id,'approved');
 }
 
 async function reject(id){
@@ -177,9 +219,24 @@ async function reject(id){
     body: JSON.stringify({id})
   });
 
-  const c = channels.find(x=>x.id===id);
-  if(c) c.status = 'rejected';
+  updateLocal(id,'rejected');
+}
 
+// 🔥 حذف من الواجهة فقط
+async function hideRow(id){
+  await fetch('/api/channels/hide',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({id})
+  });
+
+  channels = channels.filter(c => c.id !== id);
+  render();
+}
+
+function updateLocal(id,status){
+  const c = channels.find(x=>x.id===id);
+  if(c) c.status = status;
   render();
 }
 
@@ -189,14 +246,10 @@ function startLive(){
     const res = await fetch('/api/channels');
     const newData = await res.json();
 
-    if(newData.length !== channels.length){
-      alert("🔔 طلب جديد!");
-    }
-
     channels = newData;
     render();
 
-  }, 5000); // كل 5 ثواني
+  }, 5000);
 }
 
 </script>
