@@ -45,13 +45,11 @@ app.use(express.static(path.join(__dirname, "public")));
 // =============================
 app.post("/api/track", async (req, res) => {
   try {
-    // 🧠 جلب IP الحقيقي
     const ip =
       req.headers["x-forwarded-for"]?.split(",")[0] ||
       req.socket.remoteAddress ||
       "unknown";
 
-    // 🌍 جلب الدولة
     let country = "Unknown";
 
     try {
@@ -62,7 +60,6 @@ app.post("/api/track", async (req, res) => {
       console.log("Country fetch failed");
     }
 
-    // 🚫 منع السبام (نفس IP خلال 10 ثواني)
     const { data: recent } = await supabase
       .from("visitors")
       .select("id")
@@ -74,7 +71,6 @@ app.post("/api/track", async (req, res) => {
       return res.json({ skipped: true });
     }
 
-    // 💾 تسجيل الزائر
     const { error } = await supabase.from("visitors").insert([
       {
         ip,
@@ -92,6 +88,25 @@ app.post("/api/track", async (req, res) => {
 });
 
 // =============================
+// 👁️ GET VISITORS (NEW 🔥)
+// =============================
+app.get("/api/visitors", async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("visitors")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    res.json(data || []);
+  } catch (err) {
+    console.error(err);
+    res.json([]);
+  }
+});
+
+// =============================
 // 📌 REGISTER CHANNEL
 // =============================
 app.post("/api/channels/register", async (req, res) => {
@@ -102,7 +117,6 @@ app.post("/api/channels/register", async (req, res) => {
       return res.status(400).json({ error: "Missing data" });
     }
 
-    // 🔥 منع التكرار
     const { data: existing } = await supabase
       .from("channels")
       .select("id")
