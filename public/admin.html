@@ -2,108 +2,96 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8" />
-<title>لوحة التحكم</title>
+<title>Admin Panel</title>
 
 <style>
 body{
   margin:0;
-  font-family: 'Segoe UI', sans-serif;
-  background: radial-gradient(circle at top, #0f172a, #020617);
+  font-family:sans-serif;
+  background:#020617;
   color:white;
 }
 
-.container{
-  max-width:1200px;
-  margin:auto;
-  padding:30px;
-}
-
-h1{
-  text-align:center;
-  margin-bottom:20px;
-}
-
-.top-bar{
+/* LOGIN */
+.login{
   display:flex;
-  justify-content:space-between;
-  margin-bottom:20px;
+  height:100vh;
+  justify-content:center;
+  align-items:center;
+}
+
+.login-box{
+  background:#0f172a;
+  padding:30px;
+  border-radius:15px;
+  text-align:center;
 }
 
 input{
   padding:10px;
+  margin:10px;
   border-radius:10px;
   border:none;
-  width:250px;
 }
 
-.stats{
-  display:flex;
-  gap:10px;
+/* DASHBOARD */
+.container{
+  padding:20px;
+  display:none;
 }
 
-.card{
-  padding:10px 15px;
-  border-radius:10px;
-  background:rgba(255,255,255,0.05);
-}
-
-.table{
+table{
   width:100%;
   border-collapse:collapse;
-  overflow:hidden;
-  border-radius:15px;
-  background:rgba(255,255,255,0.05);
 }
 
-.table th, .table td{
-  padding:12px;
+td,th{
+  padding:10px;
   text-align:center;
 }
 
-.table tr{
-  border-bottom:1px solid rgba(255,255,255,0.1);
-}
-
-.status{
-  padding:5px 10px;
-  border-radius:8px;
-  font-size:12px;
-}
-
-.pending{ background:orange; }
-.approved{ background:green; }
-.rejected{ background:red; }
+.pending{color:orange;}
+.approved{color:green;}
+.rejected{color:red;}
 
 button{
+  padding:5px 10px;
   border:none;
-  padding:6px 10px;
-  border-radius:8px;
+  border-radius:6px;
   cursor:pointer;
 }
 
-.approve{ background:#22c55e; }
-.reject{ background:#ef4444; }
+.approve{background:green;}
+.reject{background:red;}
 
+.top{
+  display:flex;
+  justify-content:space-between;
+}
 </style>
 </head>
 
 <body>
 
-<div class="container">
-
-<h1>🚀 لوحة التحكم الاحترافية</h1>
-
-<div class="top-bar">
-  <input id="search" placeholder="بحث..." oninput="render()" />
-
-  <div class="stats">
-    <div class="card">⏳ <span id="pendingCount">0</span></div>
-    <div class="card">✅ <span id="approvedCount">0</span></div>
-    <div class="card">❌ <span id="rejectedCount">0</span></div>
+<!-- LOGIN -->
+<div class="login" id="login">
+  <div class="login-box">
+    <h2>🔐 دخول الأدمن</h2>
+    <input id="pass" type="password" placeholder="كلمة السر" />
+    <br>
+    <button onclick="login()">دخول</button>
   </div>
 </div>
 
-<table class="table">
+<!-- DASHBOARD -->
+<div class="container" id="app">
+
+<div class="top">
+  <h2>🚀 لوحة التحكم</h2>
+  <div>طلبات: <span id="count">0</span></div>
+</div>
+
+<table>
 <thead>
 <tr>
 <th>القناة</th>
@@ -113,14 +101,31 @@ button{
 <th>تحكم</th>
 </tr>
 </thead>
+
 <tbody id="table"></tbody>
+
 </table>
 
 </div>
 
 <script>
 
+const ADMIN_PASS = "123456"; // غيرها ❗
+
 let channels = [];
+
+function login(){
+  const val = document.getElementById('pass').value;
+
+  if(val === ADMIN_PASS){
+    document.getElementById('login').style.display='none';
+    document.getElementById('app').style.display='block';
+    load();
+    startLive();
+  }else{
+    alert("كلمة السر غلط");
+  }
+}
 
 async function load(){
   const res = await fetch('/api/channels');
@@ -130,29 +135,16 @@ async function load(){
 
 function render(){
   const table = document.getElementById('table');
-  const search = document.getElementById('search').value.toLowerCase();
+  table.innerHTML='';
 
-  table.innerHTML = '';
-
-  let pending=0, approved=0, rejected=0;
-
-  channels
-  .filter(c => 
-    c.channel.toLowerCase().includes(search) ||
-    c.email.toLowerCase().includes(search)
-  )
-  .forEach(c=>{
-    if(c.status==='pending') pending++;
-    if(c.status==='approved') approved++;
-    if(c.status==='rejected') rejected++;
-
+  channels.forEach(c=>{
     const row = document.createElement('tr');
 
     row.innerHTML = `
       <td>${c.channel}</td>
       <td>${c.email}</td>
       <td>${c.discord || '-'}</td>
-      <td><span class="status ${c.status}">${c.status}</span></td>
+      <td class="${c.status}">${c.status}</td>
       <td>
         <button class="approve" onclick="approve('${c.id}')">✔</button>
         <button class="reject" onclick="reject('${c.id}')">✖</button>
@@ -162,9 +154,7 @@ function render(){
     table.appendChild(row);
   });
 
-  document.getElementById('pendingCount').innerText = pending;
-  document.getElementById('approvedCount').innerText = approved;
-  document.getElementById('rejectedCount').innerText = rejected;
+  document.getElementById('count').innerText = channels.length;
 }
 
 async function approve(id){
@@ -174,7 +164,6 @@ async function approve(id){
     body: JSON.stringify({id})
   });
 
-  // تحديث محلي بدون reload 🔥
   const c = channels.find(x=>x.id===id);
   if(c) c.status = 'approved';
 
@@ -194,7 +183,21 @@ async function reject(id){
   render();
 }
 
-load();
+/* 🔔 LIVE SYSTEM */
+function startLive(){
+  setInterval(async ()=>{
+    const res = await fetch('/api/channels');
+    const newData = await res.json();
+
+    if(newData.length !== channels.length){
+      alert("🔔 طلب جديد!");
+    }
+
+    channels = newData;
+    render();
+
+  }, 5000); // كل 5 ثواني
+}
 
 </script>
 
