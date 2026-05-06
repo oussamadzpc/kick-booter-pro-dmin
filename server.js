@@ -1,4 +1,4 @@
-// 🔥 CHANNEL SYSTEM WITH SUPABASE (FULL VERSION)
+// 🔥 FINAL SECURE CHANNEL SYSTEM (FULL VERSION)
 
 const express = require("express");
 const cors = require("cors");
@@ -36,12 +36,12 @@ app.use("/admin", (req, res, next) => {
 });
 
 // =============================
-// 🌐 SERVE STATIC FILES
+// 🌐 STATIC FILES
 // =============================
 app.use(express.static(path.join(__dirname, "public")));
 
 // =============================
-// 📌 REGISTER CHANNEL
+// 📌 REGISTER CHANNEL (FIXED)
 // =============================
 app.post("/api/channels/register", async (req, res) => {
   try {
@@ -51,6 +51,17 @@ app.post("/api/channels/register", async (req, res) => {
       return res.status(400).json({ error: "Missing data" });
     }
 
+    // 🔥 منع التكرار
+    const { data: existing } = await supabase
+      .from("channels")
+      .select("id")
+      .or(`email.eq.${email},channel.eq.${channel}`)
+      .maybeSingle();
+
+    if (existing) {
+      return res.json({ error: "already_exists" });
+    }
+
     const { error } = await supabase
       .from("channels")
       .insert([{ channel, email, discord, status: "pending" }]);
@@ -58,6 +69,7 @@ app.post("/api/channels/register", async (req, res) => {
     if (error) throw error;
 
     res.json({ success: true });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
@@ -126,7 +138,7 @@ app.post("/api/channels/reject", async (req, res) => {
 });
 
 // =============================
-// 🔍 CHECK USER STATUS (🔥 جديد)
+// 🔍 CHECK STATUS (FIXED)
 // =============================
 app.post("/api/channels/status", async (req, res) => {
   try {
@@ -136,13 +148,20 @@ app.post("/api/channels/status", async (req, res) => {
       .from("channels")
       .select("status")
       .eq("email", email)
-      .single();
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-    if (error || !data) {
+    if (error) {
+      return res.json({ status: "error" });
+    }
+
+    if (!data) {
       return res.json({ status: "not_found" });
     }
 
     res.json({ status: data.status });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
