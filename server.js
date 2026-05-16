@@ -98,12 +98,17 @@ app.use((req, res, next) => {
   next();
 });
 
-// ===== STATIC FILES =====
+// ===== STATIC FILES (public first, then root fallback) =====
 app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname), { index: false, dotfiles: "ignore" }));
 
-// FIX: Serve index.html on root path
+// ===== ROOT & ADMIN PAGES =====
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+  res.sendFile(path.join(__dirname, "index.html"));
+});
+
+app.get("/admin", (req, res) => {
+  res.sendFile(path.join(__dirname, "admin.html"));
 });
 
 // ===== MIDDLEWARE: ADMIN AUTH =====
@@ -310,11 +315,6 @@ app.get("/api/stats", async (req, res) => {
 // ===== HEALTH CHECK =====
 app.get("/health", (req, res) => {
   res.json({ status: "ok", time: new Date().toISOString(), uptime: process.uptime() });
-});
-
-// ===== SERVE ADMIN PAGE =====
-app.get("/admin", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "admin.html"));
 });
 
 // ===== 404 =====
