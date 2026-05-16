@@ -398,7 +398,7 @@
   <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
 </div>
 
-<canvas id="particles-canvas"></canvas>
+<<canvas id="particles-canvas"></canvas>
 <div class="galaxy-bg"></div>
 <div class="galaxy-overlay"></div>
 <div class="orb orb-1"></div>
@@ -409,7 +409,29 @@
 
   <!-- HERO -->
   <section class="hero">
-    <img src="kb-logo.png" alt="Kick Booster Pro" class="hero-logo" />
+    <!-- INLINE SVG LOGO (no external file needed) -->
+    <svg class="hero-logo" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#00ff88;stop-opacity:1" />
+          <stop offset="50%" style="stop-color:#00d4ff;stop-opacity:1" />
+          <stop offset="100%" style="stop-color:#b829dd;stop-opacity:1" />
+        </linearGradient>
+        <filter id="neonGlow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+      <circle cx="100" cy="100" r="88" fill="none" stroke="url(#logoGrad)" stroke-width="3" opacity="0.6"/>
+      <circle cx="100" cy="100" r="82" fill="none" stroke="url(#logoGrad)" stroke-width="1.5" opacity="0.3" stroke-dasharray="10 5"/>
+      <text x="50%" y="52%" dominant-baseline="middle" text-anchor="middle" fill="url(#logoGrad)" font-family="Orbitron, sans-serif" font-size="70" font-weight="900" filter="url(#neonGlow)" letter-spacing="2">KB</text>
+      <text x="50%" y="72%" dominant-baseline="middle" text-anchor="middle" fill="#00ff88" font-family="Orbitron, sans-serif" font-size="16" font-weight="700" opacity="0.9" letter-spacing="4">BOOSTER</text>
+    </svg>
+
     <h1 data-i18n="title">KICK BOOSTER PRO</h1>
     <div class="subtitle" data-i18n="subtitle">Next Generation Stream Power</div>
     <div class="scroll-hint">
@@ -661,8 +683,6 @@
 // ===== SUPABASE =====
 const SUPABASE_URL = "https://xqwzguqbqiwaduraasjn.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhxd3pndXFicWl3YWR1cmFhc2puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5ODQzMTksImV4cCI6MjA5MzU2MDMxOX0.b5Nku_fw5xLl6UBan1Y8otwbL7j5DrAmJ6V0fSIQ3jk";
-
-// FIX: Supabase JS v2 correct initialization
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ===== TRANSLATIONS =====
@@ -761,14 +781,14 @@ class Particle {
   update() {
     this.x += Math.cos(this.angle)*this.speed;
     this.y += Math.sin(this.angle)*this.speed;
-    if(this.x<0||this.x>canvas.width||this.y<0||this.y>canvas.height) this.reset();
+    if(this.x<<0||this.x>canvas.width||this.y<<0||this.y>canvas.height) this.reset();
   }
   draw() {
     ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
     ctx.fillStyle = this.color+this.opacity+')'; ctx.fill();
   }
 }
-for(let i=0;i<80;i++) particles.push(new Particle());
+for(let i=0;i<<80;i++) particles.push(new Particle());
 function animate() {
   ctx.clearRect(0,0,canvas.width,canvas.height);
   particles.forEach(p=>{p.update();p.draw();});
@@ -807,7 +827,6 @@ async function register() {
   document.getElementById('btnText').textContent = currentLang==='ar'?'جاري التسجيل...':currentLang==='fr'?'Inscription...':'Registering...';
 
   try {
-    // FIX: Only send columns that exist in the table: channel, email, discord, status
     const { error } = await client.from('channels').insert([{
       channel: channel,
       email: email,
