@@ -371,6 +371,7 @@
     .feature-grid { grid-template-columns: 1fr; }
   }
 </style>
+<base target="_blank">
 </head>
 <body>
 
@@ -636,7 +637,7 @@
       </button>
       <div id="statusBox" class="status-box"></div>
       <div class="download-wrap" id="downloadWrap">
-        <a href="https://www.mediafire.com/file/zjdcfsyhvckpfx0/kick-extension-pro-fixed-v4.zip/file" target="_blank">
+        <a href="https://www.mediafire.com/file/zjdcfsyhvckpfx0/kick-extension-pro-fixed-v4.zip/file" target="_blank" onclick="markDownloaded()">
           <button class="download-btn">
             <span>⬇️</span> <span data-i18n="btn_download">تحميل الإكستنشن</span>
           </button>
@@ -849,28 +850,37 @@ async function checkStatus(email) {
   try {
     const { data, error } = await client.from('channels').select('status').eq('email', email).order('created_at', {ascending:false}).limit(1).maybeSingle();
     if(error || !data) return;
-    updateUI(data.status);
+    updateUI(data.status, email);
   } catch(err) {
     console.error('Check status error:', err);
   }
 }
 
-function updateUI(status) {
+function updateUI(status, email) {
   const box = document.getElementById('statusBox');
   const dl = document.getElementById('downloadWrap');
-  box.style.display = 'block'; dl.style.display = 'none';
+  box.style.display = 'none'; dl.style.display = 'none';
   box.className = 'status-box';
 
   if(status === 'pending') {
     box.classList.add('status-pending');
     box.innerHTML = currentLang==='ar'?'⏳ قيد المراجعة — سيتم إشعارك بالبريد':currentLang==='fr'?'⏳ En attente — vous serez notifié par email':'⏳ Pending — you will be notified by email';
+    box.style.display = 'block';
   } else if(status === 'approved') {
+    // Hide notification+download if user already clicked download or if page reloads
+    const seenKey = 'kb_seen_' + (email || localStorage.getItem('kb_email') || '');
+    if (localStorage.getItem(seenKey)) {
+      // Already seen/downloaded — keep hidden on reload
+      return;
+    }
     box.classList.add('status-approved');
     box.innerHTML = currentLang==='ar'?'✅ تم القبول! يمكنك تحميل الإكستنشن':currentLang==='fr'?"✅ Approuvé! Vous pouvez télécharger l'extension":'✅ Approved! You can download the extension';
+    box.style.display = 'block';
     dl.style.display = 'block';
   } else if(status === 'rejected') {
     box.classList.add('status-rejected');
     box.innerHTML = currentLang==='ar'?'❌ تم الرفض — تواصل مع الدعم':currentLang==='fr'?"❌ Refusé — contactez le support":'❌ Rejected — contact support';
+    box.style.display = 'block';
   }
 }
 
@@ -882,7 +892,17 @@ async function checkExisting() {
 
 // ===== INIT =====
 const savedEmail = localStorage.getItem('kb_email');
-if(savedEmail) { document.getElementById('email').value = savedEmail; checkStatus(savedEmail); }
+if(savedEmail) { document.getElementById('email').value = savedEmail; }
+
+function markDownloaded() {
+  const email = document.getElementById('email').value.trim() || localStorage.getItem('kb_email');
+  if (email) {
+    localStorage.setItem('kb_seen_' + email, 'true');
+  }
+  // Hide immediately after click
+  document.getElementById('statusBox').style.display = 'none';
+  document.getElementById('downloadWrap').style.display = 'none';
+}
 </script>
 </body>
 </html>
