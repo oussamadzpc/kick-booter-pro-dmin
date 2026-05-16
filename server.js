@@ -126,9 +126,10 @@ app.post("/api/channels/register", async (req, res) => {
     const { channel, email, discord } = req.body;
     if (!channel || !email) return res.status(400).json({ ok: false, error: "Missing required fields" });
 
-    const existing = await supabaseGet("channels", `or=(email.eq.${email},channel.eq.${channel})&limit=1`);
+    // Check if channel name already exists (case insensitive)
+    const existing = await supabaseGet("channels", `channel=eq.${String(channel).trim().toLowerCase()}&limit=1`);
     if (existing && existing.length > 0) {
-      return res.status(409).json({ ok: false, error: "already_exists" });
+      return res.status(409).json({ ok: false, error: "channel_exists" });
     }
 
     const data = await supabasePost("channels", {
@@ -150,16 +151,17 @@ app.post("/api/channels/register", async (req, res) => {
 // ===== PUBLIC: CHECK STATUS =====
 app.post("/api/channels/status", async (req, res) => {
   try {
-    const { email } = req.body;
-    if (!email) return res.status(400).json({ status: "error" });
+    const { channel } = req.body;
+    if (!channel) return res.status(400).json({ status: "error" });
 
-    const data = await supabaseGet("channels", `email=eq.${email}&order=created_at.desc&limit=1`);
+    const data = await supabaseGet("channels", `channel=eq.${String(channel).trim().toLowerCase()}&order=created_at.desc&limit=1`);
     if (!data || !data.length) return res.json({ status: "not_found" });
 
     const c = data[0];
     res.json({
       status: c.status,
       channel: c.channel,
+      email: c.email,
       approved: c.status === "approved",
       rejected: c.status === "rejected"
     });
