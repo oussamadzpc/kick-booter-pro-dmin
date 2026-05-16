@@ -1,589 +1,258 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Kick Booster Pro — Admin Command Center</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<title>Admin Panel</title>
+
 <style>
-  :root {
-    --neon-green: #00ff88; --neon-blue: #00d4ff; --neon-purple: #b829dd;
-    --neon-pink: #ff2d95; --neon-orange: #ff9500; --neon-red: #ff3b30;
-    --neon-gold: #ffd700;
-    --glass-bg: rgba(15, 23, 42, 0.5); --glass-border: rgba(255,255,255,0.08);
-    --dark-1: #020617; --dark-2: #0f172a;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: 'Cairo', 'Inter', sans-serif;
-    background: var(--dark-1); color: #fff;
-    min-height: 100vh; overflow-x: hidden;
-  }
+body{
+  margin:0;
+  font-family:sans-serif;
+  background:#020617;
+  color:white;
+}
 
-  /* ===== PARTICLES ===== */
-  #particles-canvas {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    z-index: 0; pointer-events: none;
-  }
-  .orb {
-    position: fixed; border-radius: 50%; filter: blur(100px); z-index: 1;
-    animation: orbFloat 25s ease-in-out infinite;
-  }
-  .orb-1 { width: 500px; height: 500px; background: var(--neon-purple); top: -150px; right: -150px; opacity: 0.2; }
-  .orb-2 { width: 400px; height: 400px; background: var(--neon-blue); bottom: -100px; left: -100px; opacity: 0.15; animation-delay: -8s; }
-  .orb-3 { width: 350px; height: 350px; background: var(--neon-green); top: 50%; left: 40%; opacity: 0.1; animation-delay: -16s; }
-  @keyframes orbFloat {
-    0%,100% { transform: translate(0,0) scale(1); }
-    33% { transform: translate(40px,-50px) scale(1.08); }
-    66% { transform: translate(-30px,30px) scale(0.95); }
-  }
+/* LOGIN */
+.login{
+  display:flex;
+  height:100vh;
+  justify-content:center;
+  align-items:center;
+}
 
-  /* ===== LOGIN ===== */
-  .login-screen {
-    position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
-    z-index: 1000; background: var(--dark-1); transition: opacity 0.6s ease, transform 0.6s ease;
-  }
-  .login-screen.hidden { opacity: 0; pointer-events: none; transform: scale(1.05); }
-  .login-card {
-    background: var(--glass-bg); backdrop-filter: blur(30px) saturate(180%);
-    border: 1px solid var(--glass-border); border-radius: 24px;
-    padding: 48px 40px; width: 100%; max-width: 400px; text-align: center;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
-  }
-  .login-card h2 {
-    font-family: 'Orbitron', sans-serif; font-size: 1.5rem;
-    background: linear-gradient(135deg, var(--neon-green), var(--neon-blue));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px;
-  }
-  .login-card .sub { color: rgba(255,255,255,0.4); font-size: 0.8rem; margin-bottom: 28px; }
-  .login-input {
-    width: 100%; padding: 14px 18px; border-radius: 12px;
-    border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3);
-    color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 1rem;
-    text-align: center; letter-spacing: 4px; outline: none; transition: all 0.3s;
-  }
-  .login-input:focus {
-    border-color: var(--neon-green);
-    box-shadow: 0 0 0 3px rgba(0,255,136,0.1), 0 0 30px rgba(0,255,136,0.1);
-  }
-  .login-btn {
-    width: 100%; margin-top: 20px; padding: 16px; border: none; border-radius: 14px;
-    background: linear-gradient(135deg, var(--neon-green), #00cc6a); color: var(--dark-1);
-    font-family: 'Cairo', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer;
-    text-transform: uppercase; letter-spacing: 2px;
-    box-shadow: 0 4px 20px rgba(0,255,136,0.3); transition: all 0.3s;
-  }
-  .login-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,255,136,0.5); }
-  .login-error { color: var(--neon-red); font-size: 0.8rem; margin-top: 12px; opacity: 0; transition: opacity 0.3s; }
-  .login-error.show { opacity: 1; }
+.login-box{
+  background:#0f172a;
+  padding:30px;
+  border-radius:15px;
+  text-align:center;
+}
 
-  /* ===== DASHBOARD ===== */
-  .dashboard { display: none; position: relative; z-index: 10; padding: 24px; max-width: 1600px; margin: 0 auto; }
-  .dashboard.active { display: block; animation: fadeIn 0.6s ease; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+input, select{
+  padding:10px;
+  margin:10px;
+  border-radius:10px;
+  border:none;
+}
 
-  /* HEADER */
-  .dash-header {
-    display: flex; justify-content: space-between; align-items: center;
-    flex-wrap: wrap; gap: 16px; margin-bottom: 28px;
-  }
-  .dash-header h1 {
-    font-family: 'Orbitron', sans-serif; font-size: 1.4rem;
-    background: linear-gradient(135deg, var(--neon-green), var(--neon-blue), var(--neon-purple));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  }
-  .dash-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-  .live-badge {
-    display: flex; align-items: center; gap: 8px;
-    background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.2);
-    padding: 6px 14px; border-radius: 20px; font-size: 0.75rem;
-  }
-  .live-dot {
-    width: 8px; height: 8px; border-radius: 50%; background: var(--neon-green);
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse { 0%,100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0,255,136,0.4); } 50% { opacity: 0.7; box-shadow: 0 0 0 8px rgba(0,255,136,0); } }
-  .logout-btn {
-    background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3);
-    padding: 8px 16px; border-radius: 10px; cursor: pointer; font-family: 'Cairo', sans-serif;
-    font-size: 0.8rem; font-weight: 700; transition: all 0.3s;
-  }
-  .logout-btn:hover { background: rgba(239,68,68,0.25); box-shadow: 0 0 20px rgba(239,68,68,0.2); }
+/* DASHBOARD */
+.container{
+  padding:20px;
+  display:none;
+}
 
-  /* STATS */
-  .stats-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 16px; margin-bottom: 28px;
-  }
-  .stat-card {
-    background: var(--glass-bg); backdrop-filter: blur(16px);
-    border: 1px solid var(--glass-border); border-radius: 16px;
-    padding: 20px; position: relative; overflow: hidden; transition: all 0.3s;
-  }
-  .stat-card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.15); }
-  .stat-card::after {
-    content: ''; position: absolute; top: 0; right: 0;
-    width: 60px; height: 60px; border-radius: 0 16px 0 60px; opacity: 0.1;
-  }
-  .stat-card.green::after { background: var(--neon-green); }
-  .stat-card.blue::after { background: var(--neon-blue); }
-  .stat-card.purple::after { background: var(--neon-purple); }
-  .stat-card.orange::after { background: var(--neon-orange); }
-  .stat-card.red::after { background: var(--neon-red); }
-  .stat-card.gold::after { background: var(--neon-gold); }
-  .stat-label { font-size: 0.7rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
-  .stat-value {
-    font-family: 'Orbitron', sans-serif; font-size: 1.8rem; font-weight: 900; line-height: 1;
-  }
-  .stat-card.green .stat-value { color: var(--neon-green); text-shadow: 0 0 20px rgba(0,255,136,0.3); }
-  .stat-card.blue .stat-value { color: var(--neon-blue); text-shadow: 0 0 20px rgba(0,212,255,0.3); }
-  .stat-card.purple .stat-value { color: var(--neon-purple); text-shadow: 0 0 20px rgba(184,41,221,0.3); }
-  .stat-card.orange .stat-value { color: var(--neon-orange); text-shadow: 0 0 20px rgba(255,149,0,0.3); }
-  .stat-card.red .stat-value { color: var(--neon-red); text-shadow: 0 0 20px rgba(255,59,48,0.3); }
-  .stat-card.gold .stat-value { color: var(--neon-gold); text-shadow: 0 0 20px rgba(255,215,0,0.3); }
-  .stat-change { font-size: 0.7rem; margin-top: 6px; color: rgba(255,255,255,0.4); }
-  .stat-change.up { color: var(--neon-green); }
+table{
+  width:100%;
+  border-collapse:collapse;
+  background:#0f172a;
+  border-radius:10px;
+  overflow:hidden;
+}
 
-  /* CHARTS */
-  .charts-row {
-    display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 28px;
-  }
-  @media (max-width: 900px) { .charts-row { grid-template-columns: 1fr; } }
-  .chart-card {
-    background: var(--glass-bg); backdrop-filter: blur(16px);
-    border: 1px solid var(--glass-border); border-radius: 16px; padding: 20px;
-  }
-  .chart-card h3 {
-    font-size: 0.85rem; color: rgba(255,255,255,0.6); text-transform: uppercase;
-    letter-spacing: 1px; margin-bottom: 16px;
-  }
+td,th{
+  padding:10px;
+  text-align:center;
+}
 
-  /* TOOLBAR */
-  .toolbar {
-    display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 20px;
-  }
-  .tool-input {
-    padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);
-    background: rgba(0,0,0,0.3); color: #fff; font-family: 'Cairo', sans-serif;
-    font-size: 0.85rem; outline: none; transition: all 0.3s; min-width: 200px;
-  }
-  .tool-input:focus { border-color: var(--neon-blue); box-shadow: 0 0 0 3px rgba(0,212,255,0.1); }
-  .tool-select {
-    padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);
-    background: rgba(0,0,0,0.3); color: #fff; font-family: 'Cairo', sans-serif;
-    font-size: 0.85rem; outline: none; cursor: pointer;
-  }
-  .tool-btn {
-    padding: 10px 20px; border-radius: 10px; border: none;
-    font-family: 'Cairo', sans-serif; font-size: 0.85rem; font-weight: 700;
-    cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px;
-  }
-  .tool-btn-green { background: linear-gradient(135deg, var(--neon-green), #00cc6a); color: var(--dark-1); }
-  .tool-btn-green:hover { box-shadow: 0 4px 20px rgba(0,255,136,0.4); transform: translateY(-2px); }
-  .tool-btn-red { background: linear-gradient(135deg, var(--neon-red), #cc2a20); color: #fff; }
-  .tool-btn-red:hover { box-shadow: 0 4px 20px rgba(255,59,48,0.4); transform: translateY(-2px); }
-  .tool-btn-blue { background: linear-gradient(135deg, var(--neon-blue), #0088cc); color: #fff; }
-  .tool-btn-blue:hover { box-shadow: 0 4px 20px rgba(0,212,255,0.4); transform: translateY(-2px); }
+tr:nth-child(even){
+  background:#020617;
+}
 
-  /* TABLE */
-  .table-wrap {
-    background: var(--glass-bg); backdrop-filter: blur(16px);
-    border: 1px solid var(--glass-border); border-radius: 16px;
-    overflow: hidden; margin-bottom: 28px;
-  }
-  table { width: 100%; border-collapse: collapse; }
-  th {
-    background: rgba(0,0,0,0.3); padding: 14px 16px; text-align: right;
-    font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;
-    color: rgba(255,255,255,0.5); font-weight: 700; border-bottom: 1px solid var(--glass-border);
-  }
-  td {
-    padding: 12px 16px; font-size: 0.85rem;
-    border-bottom: 1px solid rgba(255,255,255,0.03); color: rgba(255,255,255,0.85);
-  }
-  tr:hover td { background: rgba(255,255,255,0.02); }
-  .badge {
-    display: inline-block; padding: 4px 10px; border-radius: 6px;
-    font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
-  }
-  .badge-pending { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
-  .badge-approved { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
-  .badge-rejected { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
-  .badge-vip {
-    background: linear-gradient(135deg, rgba(184,41,221,0.2), rgba(255,45,149,0.2));
-    color: #e879f9; border: 1px solid rgba(184,41,221,0.4);
-  }
-  .action-btns { display: flex; gap: 6px; }
-  .act-btn {
-    width: 32px; height: 32px; border-radius: 8px; border: none;
-    cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; justify-content: center;
-    transition: all 0.2s;
-  }
-  .act-btn:hover { transform: scale(1.1); }
-  .act-ok { background: rgba(34,197,94,0.2); color: #4ade80; }
-  .act-no { background: rgba(239,68,68,0.2); color: #f87171; }
-  .act-del { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.5); }
-  .act-vip { background: rgba(184,41,221,0.2); color: #e879f9; border: 1px solid rgba(184,41,221,0.3); }
+.pending{color:orange;}
+.approved{color:#22c55e;}
+.rejected{color:#ef4444;}
 
-  /* TOAST */
-  .toast {
-    position: fixed; top: 20px; left: 50%;
-    transform: translateX(-50%) translateY(-120px);
-    background: var(--glass-bg); backdrop-filter: blur(24px);
-    border: 1px solid var(--glass-border); border-radius: 14px;
-    padding: 14px 28px; color: #fff; font-weight: 700;
-    z-index: 2000; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    box-shadow: 0 12px 40px rgba(0,0,0,0.4); font-size: 0.9rem;
-  }
-  .toast.show { transform: translateX(-50%) translateY(0); }
-  .toast-ok { border-color: rgba(0,255,136,0.4); color: #4ade80; }
-  .toast-err { border-color: rgba(239,68,68,0.4); color: #f87171; }
+button{
+  padding:5px 10px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
 
-  /* SCROLLBAR */
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: var(--dark-1); }
-  ::-webkit-scrollbar-thumb { background: rgba(0,255,136,0.25); border-radius: 3px; }
+.approve{background:#22c55e;}
+.reject{background:#ef4444;}
+.hide{background:gray;}
 
-  /* RESPONSIVE */
-  @media (max-width: 768px) {
-    .dash-header { flex-direction: column; align-items: flex-start; }
-    .stats-grid { grid-template-columns: repeat(2, 1fr); }
-    .charts-row { grid-template-columns: 1fr; }
-    .toolbar { flex-direction: column; align-items: stretch; }
-    .tool-input, .tool-select, .tool-btn { width: 100%; }
-    table { font-size: 0.75rem; }
-    th, td { padding: 8px 10px; }
-  }
+.top{
+  display:flex;
+  justify-content:space-between;
+  flex-wrap:wrap;
+}
+
+.filters{
+  display:flex;
+  gap:10px;
+}
 </style>
-<base target="_blank">
 </head>
+
 <body>
 
-<canvas id="particles-canvas"></canvas>
-<div class="orb orb-1"></div>
-<div class="orb orb-2"></div>
-<div class="orb orb-3"></div>
-
 <!-- LOGIN -->
-<div class="login-screen" id="loginScreen">
-  <div class="login-card">
-    <h2>⚡ ADMIN COMMAND</h2>
-    <div class="sub">Kick Booster Pro — Secure Access</div>
-    <input type="password" id="adminPass" class="login-input" placeholder="••••" maxlength="10" onkeydown="if(event.key==='Enter')doLogin()" />
-    <button class="login-btn" onclick="doLogin()">دخول النظام</button>
-    <div class="login-error" id="loginError">كلمة السر غير صحيحة</div>
+<div class="login" id="login">
+  <div class="login-box">
+    <h2>🔐 دخول الأدمن</h2>
+    <input id="pass" type="password" placeholder="كلمة السر" />
+    <br>
+    <button onclick="login()">دخول</button>
   </div>
 </div>
 
 <!-- DASHBOARD -->
-<div class="dashboard" id="dashboard">
+<div class="container" id="app">
 
-  <div class="dash-header">
-    <h1>⚡ COMMAND CENTER</h1>
-    <div class="dash-actions">
-      <div class="live-badge">
-        <div class="live-dot"></div>
-        <span>SYSTEM ONLINE</span>
-        <span id="sysTime" style="font-family:'JetBrains Mono',monospace;opacity:0.6;"></span>
-      </div>
-      <button class="logout-btn" onclick="logout()">🚪 خروج</button>
-    </div>
-  </div>
+<div class="top">
+  <h2>🚀 لوحة التحكم</h2>
 
-  <!-- STATS -->
-  <div class="stats-grid">
-    <div class="stat-card green">
-      <div class="stat-label">القنوات المفعلة</div>
-      <div class="stat-value" id="stApproved">0</div>
-      <div class="stat-change up">+12% هذا الأسبوع</div>
-    </div>
-    <div class="stat-card orange">
-      <div class="stat-label">قيد المراجعة</div>
-      <div class="stat-value" id="stPending">0</div>
-    </div>
-    <div class="stat-card purple">
-      <div class="stat-label">VIP</div>
-      <div class="stat-value" id="stVip">0</div>
-    </div>
-    <div class="stat-card blue">
-      <div class="stat-label">إجمالي القنوات</div>
-      <div class="stat-value" id="stTotal">0</div>
-    </div>
-    <div class="stat-card gold">
-      <div class="stat-label">الزوار</div>
-      <div class="stat-value" id="stVisitors">0</div>
-    </div>
-    <div class="stat-card red">
-      <div class="stat-label">الحضور النشط</div>
-      <div class="stat-value" id="stPresence">0</div>
-    </div>
-  </div>
+  <div class="filters">
+    <input id="search" placeholder="بحث..." oninput="render()" />
 
-
-  <!-- TOOLBAR -->
-  <div class="toolbar">
-    <input type="text" id="searchInput" class="tool-input" placeholder="🔍 بحث قناة أو إيميل..." oninput="renderTable()" />
-    <select id="filterStatus" class="tool-select" onchange="renderTable()">
+    <select id="filter" onchange="render()">
       <option value="all">الكل</option>
-      <option value="pending">قيد المراجعة</option>
-      <option value="approved">مفعلة</option>
-      <option value="rejected">مرفوضة</option>
+      <option value="pending">Pending</option>
+      <option value="approved">Approved</option>
+      <option value="rejected">Rejected</option>
     </select>
-    <button class="tool-btn tool-btn-green" onclick="bulkApprove()">✔ تفعيل المحدد</button>
-    <button class="tool-btn tool-btn-red" onclick="bulkReject()">✖ رفض المحدد</button>
-    <button class="tool-btn tool-btn-blue" onclick="loadAll()">🔄 تحديث</button>
   </div>
 
-  <!-- TABLE -->
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th><input type="checkbox" id="selectAll" onchange="toggleAll()"></th>
-          <th>القناة</th>
-          <th>الإيميل</th>
-          <th>ديسكورد</th>
-          <th>الحالة</th>
-          <th>التاريخ</th>
-          <th>تحكم</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody"></tbody>
-    </table>
-  </div>
+  <div>طلبات: <span id="count">0</span></div>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>القناة</th>
+<th>الإيميل</th>
+<th>ديسكورد</th>
+<th>الحالة</th>
+<th>التاريخ</th>
+<th>تحكم</th>
+</tr>
+</thead>
+
+<tbody id="table"></tbody>
+
+</table>
 
 </div>
 
-<div class="toast" id="toast"></div>
-
 <script>
-// ===== SUPABASE =====
-const SUPABASE_URL = "https://xqwzguqbqiwaduraasjn.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhxd3pndXFicWl3YWR1cmFhc2puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5ODQzMTksImV4cCI6MjA5MzU2MDMxOX0.b5Nku_fw5xLl6UBan1Y8otwbL7j5DrAmJ6V0fSIQ3jk";
 
-// FIX: Supabase JS v2 correct initialization
-const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const ADMIN_PASS = "2107";
 
 let channels = [];
-let visitors = [];
-let selectedIds = new Set();
-let growthChart, geoChart;
-let adminPassword = '';
 
-// ===== PARTICLES =====
-const canvas = document.getElementById('particles-canvas');
-const ctx = canvas.getContext('2d');
-let particles = [];
-function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-window.addEventListener('resize', resize); resize();
-class Particle {
-  constructor() { this.reset(); }
-  reset() {
-    this.x = Math.random()*canvas.width; this.y = Math.random()*canvas.height;
-    this.size = Math.random()*1.5+0.3; this.speed = Math.random()*0.3+0.1;
-    this.angle = Math.random()*Math.PI*2;
-    this.color = Math.random()>0.5?'rgba(0,255,136,':'rgba(0,212,255,';
-    this.opacity = Math.random()*0.4+0.1;
-  }
-  update() {
-    this.x += Math.cos(this.angle)*this.speed;
-    this.y += Math.sin(this.angle)*this.speed;
-    if(this.x<0||this.x>canvas.width||this.y<0||this.y>canvas.height) this.reset();
-  }
-  draw() {
-    ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
-    ctx.fillStyle = this.color+this.opacity+')'; ctx.fill();
-  }
-}
-for(let i=0;i<80;i++) particles.push(new Particle());
-function animate() {
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  particles.forEach(p=>{p.update();p.draw();});
-  requestAnimationFrame(animate);
-}
-animate();
+function login(){
+  const val = document.getElementById('pass').value;
 
-// ===== LOGIN =====
-function doLogin() {
-  const pass = document.getElementById('adminPass').value;
-  const storedPass = localStorage.getItem('kb_admin_pass');
-  if(pass === '2107' || pass === storedPass) {
-    adminPassword = pass;
-    localStorage.setItem('kb_admin_pass', pass);
-    document.getElementById('loginScreen').classList.add('hidden');
-    document.getElementById('dashboard').classList.add('active');
-    loadAll(); startLive();
-  } else {
-    document.getElementById('loginError').classList.add('show');
-    setTimeout(()=>document.getElementById('loginError').classList.remove('show'), 3000);
+  if(val === ADMIN_PASS){
+    document.getElementById('login').style.display='none';
+    document.getElementById('app').style.display='block';
+    load();
+    startLive();
+  }else{
+    alert("كلمة السر غلط");
   }
 }
 
-function logout() {
-  localStorage.removeItem('kb_admin_pass');
-  location.reload();
+async function load(){
+  const res = await fetch('/api/channels');
+  channels = await res.json();
+  render();
 }
 
-// ===== TOAST =====
-function toast(msg, type='ok') {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.className = 'toast toast-'+type+' show';
-  setTimeout(()=>t.classList.remove('show'), 3000);
-}
+function render(){
+  const table = document.getElementById('table');
+  const search = document.getElementById('search').value.toLowerCase();
+  const filter = document.getElementById('filter').value;
 
-// ===== LOAD DATA =====
-async function loadAll() {
-  await Promise.all([loadChannels(), loadVisitors()]);
-  renderTable(); updateStats();
-}
+  table.innerHTML='';
 
-async function loadChannels() {
-  const { data, error } = await client.from('channels').select('*').order('created_at', {ascending: false});
-  if(error) { console.error(error); return; }
-  channels = data || [];
-}
+  let count = 0;
 
-async function loadVisitors() {
-  const { data, error } = await client.from('visitors').select('*').order('created_at', {ascending: false}).limit(1000);
-  if(error) { console.error(error); return; }
-  visitors = data || [];
-}
+  channels
+  .filter(c =>
+    (filter === "all" || c.status === filter) &&
+    (
+      c.channel.toLowerCase().includes(search) ||
+      c.email.toLowerCase().includes(search)
+    )
+  )
+  .forEach(c=>{
 
-function updateStats() {
-  const approved = channels.filter(c => c.status === 'approved' && !c.hidden).length;
-  const pending = channels.filter(c => c.status === 'pending' && !c.hidden).length;
-  const rejected = channels.filter(c => c.status === 'rejected' || c.hidden).length;
-  const vip = channels.filter(c => c.is_vip && !c.hidden).length;
-  const total = channels.length;
+    const row = document.createElement('tr');
+    const date = new Date(c.created_at).toLocaleString();
 
-  document.getElementById('stApproved').textContent = approved;
-  document.getElementById('stPending').textContent = pending;
-  document.getElementById('stVip').textContent = vip;
-  document.getElementById('stTotal').textContent = total;
-  document.getElementById('stVisitors').textContent = visitors.length;
-  document.getElementById('stPresence').textContent = '0';
-}
-
-// ===== TABLE =====
-function renderTable() {
-  const tbody = document.getElementById('tableBody');
-  const search = document.getElementById('searchInput').value.toLowerCase();
-  const filter = document.getElementById('filterStatus').value;
-  tbody.innerHTML = '';
-
-  channels.filter(c => {
-    if(filter !== 'all') {
-      if(filter === 'pending' && c.status !== 'pending') return false;
-      if(filter === 'approved' && c.status !== 'approved') return false;
-      if(filter === 'rejected' && c.status !== 'rejected') return false;
-    }
-    return (c.channel||'').toLowerCase().includes(search) || (c.email||'').toLowerCase().includes(search);
-  }).forEach(c => {
-    const tr = document.createElement('tr');
-    const status = c.status || 'pending';
-    const statusBadge = `<span class="badge badge-${status}">${status==='approved'?'مفعل':status==='pending'?'قيد المراجعة':'مرفوض'}</span>`;
-    const vipBadge = c.is_vip ? `<span class="badge badge-vip" style="margin-right:6px;">VIP</span>` : '';
-    const checked = selectedIds.has(c.id) ? 'checked' : '';
-
-    tr.innerHTML = `
-      <td><input type="checkbox" ${checked} onchange="toggleSelect('${c.id}')"></td>
-      <td><strong>${c.channel}</strong>${vipBadge}</td>
-      <td>${c.email||'-'}</td>
-      <td>${c.discord||'-'}</td>
-      <td>${statusBadge}</td>
-      <td>${new Date(c.created_at).toLocaleDateString('ar-SA')}</td>
+    row.innerHTML = `
+      <td>${c.channel}</td>
+      <td>${c.email}</td>
+      <td>${c.discord || '-'}</td>
+      <td class="${c.status}">${c.status}</td>
+      <td>${date}</td>
       <td>
-        <div class="action-btns">
-          <button class="act-btn act-ok" onclick="approve('${c.id}')" title="تفعيل">✔</button>
-          <button class="act-btn act-no" onclick="reject('${c.id}')" title="رفض">✖</button>
-          <button class="act-btn act-vip" onclick="toggleVip('${c.id}', ${!c.is_vip})" title="VIP">👑</button>
-          <button class="act-btn act-del" onclick="hideRow('${c.id}')" title="حذف">🗑</button>
-        </div>
+        <button class="approve" onclick="approve('${c.id}')">✔</button>
+        <button class="reject" onclick="reject('${c.id}')">✖</button>
+        <button class="hide" onclick="hideRow('${c.id}')">🗑</button>
       </td>
     `;
-    tbody.appendChild(tr);
+
+    table.appendChild(row);
+    count++;
   });
+
+  document.getElementById('count').innerText = count;
 }
 
-function toggleSelect(id) {
-  if(selectedIds.has(id)) selectedIds.delete(id); else selectedIds.add(id);
-}
-function toggleAll() {
-  const checked = document.getElementById('selectAll').checked;
-  channels.forEach(c => { if(checked) selectedIds.add(c.id); else selectedIds.delete(c.id); });
-  renderTable();
-}
+async function approve(id){
+  await fetch('/api/channels/approve',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({id})
+  });
 
-// ===== ACTIONS =====
-async function approve(id) {
-  const { error } = await client.from('channels').update({ status: 'approved' }).eq('id', id);
-  if(error) { toast('خطأ في التفعيل', 'err'); return; }
-  toast('تم التفعيل'); loadAll();
+  updateLocal(id,'approved');
 }
 
-async function reject(id) {
-  const { error } = await client.from('channels').update({ status: 'rejected' }).eq('id', id);
-  if(error) { toast('خطأ في الرفض', 'err'); return; }
-  toast('تم الرفض', 'err'); loadAll();
+async function reject(id){
+  await fetch('/api/channels/reject',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({id})
+  });
+
+  updateLocal(id,'rejected');
 }
 
-async function toggleVip(id, makeVip) {
-  const { error } = await client.from('channels').update({ is_vip: makeVip }).eq('id', id);
-  if(error) { toast('خطأ', 'err'); return; }
-  toast(makeVip ? 'تم تعيين VIP' : 'تم إلغاء VIP'); loadAll();
+// 🔥 حذف من الواجهة فقط
+async function hideRow(id){
+  await fetch('/api/channels/hide',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({id})
+  });
+
+  channels = channels.filter(c => c.id !== id);
+  render();
 }
 
-async function hideRow(id) {
-  const { error } = await client.from('channels').update({ hidden: true, status: 'rejected' }).eq('id', id);
-  if(error) { toast('خطأ في الحذف', 'err'); return; }
-  toast('تم الحذف'); loadAll();
+function updateLocal(id,status){
+  const c = channels.find(x=>x.id===id);
+  if(c) c.status = status;
+  render();
 }
 
-async function bulkApprove() {
-  const ids = Array.from(selectedIds);
-  if(!ids.length) return;
-  for(const id of ids) {
-    await client.from('channels').update({ status: 'approved' }).eq('id', id);
-  }
-  toast('تم تفعيل ' + ids.length + ' قنوات');
-  selectedIds.clear(); document.getElementById('selectAll').checked = false;
-  loadAll();
-}
+/* 🔔 LIVE SYSTEM */
+function startLive(){
+  setInterval(async ()=>{
+    const res = await fetch('/api/channels');
+    const newData = await res.json();
 
-async function bulkReject() {
-  const ids = Array.from(selectedIds);
-  if(!ids.length) return;
-  for(const id of ids) {
-    await client.from('channels').update({ status: 'rejected' }).eq('id', id);
-  }
-  toast('تم رفض ' + ids.length + ' قنوات', 'err');
-  selectedIds.clear(); document.getElementById('selectAll').checked = false;
-  loadAll();
-}
+    channels = newData;
+    render();
 
-// ===== LIVE =====
-
-function startLive() {
-  setInterval(async () => {
-    await loadAll();
   }, 5000);
 }
 
-// ===== CLOCK =====
-setInterval(() => {
-  document.getElementById('sysTime').textContent = new Date().toLocaleTimeString('ar-SA');
-}, 1000);
-
-// ===== INIT =====
-if(localStorage.getItem('kb_admin_pass')) {
-  adminPassword = localStorage.getItem('kb_admin_pass');
-  document.getElementById('loginScreen').classList.add('hidden');
-  document.getElementById('dashboard').classList.add('active');
-  loadAll(); startLive();
-}
 </script>
+
 </body>
 </html>
