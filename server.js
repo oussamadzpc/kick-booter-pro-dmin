@@ -98,17 +98,17 @@ app.use((req, res, next) => {
   next();
 });
 
-// ===== STATIC FILES (public first, then root fallback) =====
+// ===== STATIC FILES =====
 app.use(express.static(path.join(__dirname, "public")));
-app.use(express.static(path.join(__dirname), { index: false, dotfiles: "ignore" }));
 
-// ===== ROOT & ADMIN PAGES =====
+// ===== ROOT PATH → index.html =====
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
+// ===== ADMIN PATH → admin.html =====
 app.get("/admin", (req, res) => {
-  res.sendFile(path.join(__dirname, "admin.html"));
+  res.sendFile(path.join(__dirname, "public", "admin.html"));
 });
 
 // ===== MIDDLEWARE: ADMIN AUTH =====
