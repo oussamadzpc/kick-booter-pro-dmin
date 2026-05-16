@@ -7,31 +7,29 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root {
     --neon-green: #00ff88; --neon-blue: #00d4ff; --neon-purple: #b829dd;
     --neon-pink: #ff2d95; --neon-orange: #ff9500; --neon-red: #ff3b30;
+    --neon-gold: #ffd700;
     --glass-bg: rgba(15, 23, 42, 0.5); --glass-border: rgba(255,255,255,0.08);
-    --dark-1: #020617; --dark-2: #0f172a; --dark-3: #1e293b;
+    --dark-1: #020617; --dark-2: #0f172a;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    font-family: 'Cairo', sans-serif;
-    background: var(--dark-1);
-    color: #fff;
-    min-height: 100vh;
-    overflow-x: hidden;
+    font-family: 'Cairo', 'Inter', sans-serif;
+    background: var(--dark-1); color: #fff;
+    min-height: 100vh; overflow-x: hidden;
   }
 
   /* ===== PARTICLES ===== */
   #particles-canvas {
-    position: fixed; top: 0; left: 0;
-    width: 100%; height: 100%;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     z-index: 0; pointer-events: none;
   }
   .orb {
-    position: fixed; border-radius: 50%;
-    filter: blur(100px); z-index: 1;
+    position: fixed; border-radius: 50%; filter: blur(100px); z-index: 1;
     animation: orbFloat 25s ease-in-out infinite;
   }
   .orb-1 { width: 500px; height: 500px; background: var(--neon-purple); top: -150px; right: -150px; opacity: 0.2; }
@@ -45,61 +43,41 @@
 
   /* ===== LOGIN ===== */
   .login-screen {
-    position: fixed; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    z-index: 1000; background: var(--dark-1);
-    transition: opacity 0.6s ease, transform 0.6s ease;
+    position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+    z-index: 1000; background: var(--dark-1); transition: opacity 0.6s ease, transform 0.6s ease;
   }
   .login-screen.hidden { opacity: 0; pointer-events: none; transform: scale(1.05); }
   .login-card {
-    background: var(--glass-bg);
-    backdrop-filter: blur(30px) saturate(180%);
-    border: 1px solid var(--glass-border);
-    border-radius: 24px;
-    padding: 48px 40px;
-    width: 100%; max-width: 400px;
-    text-align: center;
+    background: var(--glass-bg); backdrop-filter: blur(30px) saturate(180%);
+    border: 1px solid var(--glass-border); border-radius: 24px;
+    padding: 48px 40px; width: 100%; max-width: 400px; text-align: center;
     box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
   }
   .login-card h2 {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 1.5rem;
+    font-family: 'Orbitron', sans-serif; font-size: 1.5rem;
     background: linear-gradient(135deg, var(--neon-green), var(--neon-blue));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    margin-bottom: 8px;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px;
   }
   .login-card .sub { color: rgba(255,255,255,0.4); font-size: 0.8rem; margin-bottom: 28px; }
   .login-input {
-    width: 100%; padding: 14px 18px;
-    border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
-    background: rgba(0,0,0,0.3); color: #fff;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 1rem; text-align: center;
-    letter-spacing: 4px;
-    outline: none; transition: all 0.3s ease;
+    width: 100%; padding: 14px 18px; border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3);
+    color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 1rem;
+    text-align: center; letter-spacing: 4px; outline: none; transition: all 0.3s;
   }
   .login-input:focus {
     border-color: var(--neon-green);
     box-shadow: 0 0 0 3px rgba(0,255,136,0.1), 0 0 30px rgba(0,255,136,0.1);
   }
   .login-btn {
-    width: 100%; margin-top: 20px;
-    padding: 16px; border: none; border-radius: 14px;
-    background: linear-gradient(135deg, var(--neon-green), #00cc6a);
-    color: var(--dark-1); font-family: 'Cairo', sans-serif;
-    font-size: 1rem; font-weight: 700; cursor: pointer;
+    width: 100%; margin-top: 20px; padding: 16px; border: none; border-radius: 14px;
+    background: linear-gradient(135deg, var(--neon-green), #00cc6a); color: var(--dark-1);
+    font-family: 'Cairo', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer;
     text-transform: uppercase; letter-spacing: 2px;
-    box-shadow: 0 4px 20px rgba(0,255,136,0.3);
-    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0,255,136,0.3); transition: all 0.3s;
   }
-  .login-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(0,255,136,0.5);
-  }
-  .login-error {
-    color: var(--neon-red); font-size: 0.8rem;
-    margin-top: 12px; opacity: 0; transition: opacity 0.3s;
-  }
+  .login-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,255,136,0.5); }
+  .login-error { color: var(--neon-red); font-size: 0.8rem; margin-top: 12px; opacity: 0; transition: opacity 0.3s; }
   .login-error.show { opacity: 1; }
 
   /* ===== DASHBOARD ===== */
@@ -113,111 +91,95 @@
     flex-wrap: wrap; gap: 16px; margin-bottom: 28px;
   }
   .dash-header h1 {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 1.4rem;
+    font-family: 'Orbitron', sans-serif; font-size: 1.4rem;
     background: linear-gradient(135deg, var(--neon-green), var(--neon-blue), var(--neon-purple));
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   }
+  .dash-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
   .live-badge {
     display: flex; align-items: center; gap: 8px;
     background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.2);
     padding: 6px 14px; border-radius: 20px; font-size: 0.75rem;
   }
   .live-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: var(--neon-green); animation: pulse 2s infinite;
+    width: 8px; height: 8px; border-radius: 50%; background: var(--neon-green);
+    animation: pulse 2s infinite;
   }
   @keyframes pulse { 0%,100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0,255,136,0.4); } 50% { opacity: 0.7; box-shadow: 0 0 0 8px rgba(0,255,136,0); } }
+  .logout-btn {
+    background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3);
+    padding: 8px 16px; border-radius: 10px; cursor: pointer; font-family: 'Cairo', sans-serif;
+    font-size: 0.8rem; font-weight: 700; transition: all 0.3s;
+  }
+  .logout-btn:hover { background: rgba(239,68,68,0.25); box-shadow: 0 0 20px rgba(239,68,68,0.2); }
 
-  /* STATS GRID */
+  /* STATS */
   .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 16px; margin-bottom: 28px;
   }
   .stat-card {
-    background: var(--glass-bg);
-    backdrop-filter: blur(16px);
-    border: 1px solid var(--glass-border);
-    border-radius: 16px;
-    padding: 20px;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s ease;
+    background: var(--glass-bg); backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border); border-radius: 16px;
+    padding: 20px; position: relative; overflow: hidden; transition: all 0.3s;
   }
   .stat-card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.15); }
   .stat-card::after {
     content: ''; position: absolute; top: 0; right: 0;
-    width: 60px; height: 60px; border-radius: 0 16px 0 60px;
-    opacity: 0.1;
+    width: 60px; height: 60px; border-radius: 0 16px 0 60px; opacity: 0.1;
   }
   .stat-card.green::after { background: var(--neon-green); }
   .stat-card.blue::after { background: var(--neon-blue); }
   .stat-card.purple::after { background: var(--neon-purple); }
   .stat-card.orange::after { background: var(--neon-orange); }
   .stat-card.red::after { background: var(--neon-red); }
-  .stat-card.pink::after { background: var(--neon-pink); }
+  .stat-card.gold::after { background: var(--neon-gold); }
   .stat-label { font-size: 0.7rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
   .stat-value {
-    font-family: 'Orbitron', sans-serif; font-size: 1.8rem; font-weight: 900;
-    line-height: 1;
+    font-family: 'Orbitron', sans-serif; font-size: 1.8rem; font-weight: 900; line-height: 1;
   }
   .stat-card.green .stat-value { color: var(--neon-green); text-shadow: 0 0 20px rgba(0,255,136,0.3); }
   .stat-card.blue .stat-value { color: var(--neon-blue); text-shadow: 0 0 20px rgba(0,212,255,0.3); }
   .stat-card.purple .stat-value { color: var(--neon-purple); text-shadow: 0 0 20px rgba(184,41,221,0.3); }
   .stat-card.orange .stat-value { color: var(--neon-orange); text-shadow: 0 0 20px rgba(255,149,0,0.3); }
   .stat-card.red .stat-value { color: var(--neon-red); text-shadow: 0 0 20px rgba(255,59,48,0.3); }
-  .stat-card.pink .stat-value { color: var(--neon-pink); text-shadow: 0 0 20px rgba(255,45,149,0.3); }
+  .stat-card.gold .stat-value { color: var(--neon-gold); text-shadow: 0 0 20px rgba(255,215,0,0.3); }
   .stat-change { font-size: 0.7rem; margin-top: 6px; color: rgba(255,255,255,0.4); }
   .stat-change.up { color: var(--neon-green); }
-  .stat-change.down { color: var(--neon-red); }
 
-  /* CHARTS ROW */
+  /* CHARTS */
   .charts-row {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 16px; margin-bottom: 28px;
+    display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 28px;
   }
   @media (max-width: 900px) { .charts-row { grid-template-columns: 1fr; } }
   .chart-card {
-    background: var(--glass-bg);
-    backdrop-filter: blur(16px);
-    border: 1px solid var(--glass-border);
-    border-radius: 16px;
-    padding: 20px;
+    background: var(--glass-bg); backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border); border-radius: 16px; padding: 20px;
   }
   .chart-card h3 {
-    font-size: 0.85rem; color: rgba(255,255,255,0.6);
-    text-transform: uppercase; letter-spacing: 1px;
-    margin-bottom: 16px;
+    font-size: 0.85rem; color: rgba(255,255,255,0.6); text-transform: uppercase;
+    letter-spacing: 1px; margin-bottom: 16px;
   }
 
   /* TOOLBAR */
   .toolbar {
-    display: flex; gap: 12px; flex-wrap: wrap;
-    align-items: center; margin-bottom: 20px;
+    display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 20px;
   }
   .tool-input {
-    padding: 10px 16px; border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.1);
-    background: rgba(0,0,0,0.3); color: #fff;
-    font-family: 'Cairo', sans-serif; font-size: 0.85rem;
-    outline: none; transition: all 0.3s;
-    min-width: 200px;
+    padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(0,0,0,0.3); color: #fff; font-family: 'Cairo', sans-serif;
+    font-size: 0.85rem; outline: none; transition: all 0.3s; min-width: 200px;
   }
   .tool-input:focus { border-color: var(--neon-blue); box-shadow: 0 0 0 3px rgba(0,212,255,0.1); }
   .tool-select {
-    padding: 10px 14px; border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.1);
-    background: rgba(0,0,0,0.3); color: #fff;
-    font-family: 'Cairo', sans-serif; font-size: 0.85rem;
-    outline: none; cursor: pointer;
+    padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(0,0,0,0.3); color: #fff; font-family: 'Cairo', sans-serif;
+    font-size: 0.85rem; outline: none; cursor: pointer;
   }
   .tool-btn {
     padding: 10px 20px; border-radius: 10px; border: none;
-    font-family: 'Cairo', sans-serif; font-size: 0.85rem;
-    font-weight: 700; cursor: pointer; transition: all 0.3s;
-    text-transform: uppercase; letter-spacing: 1px;
+    font-family: 'Cairo', sans-serif; font-size: 0.85rem; font-weight: 700;
+    cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px;
   }
   .tool-btn-green { background: linear-gradient(135deg, var(--neon-green), #00cc6a); color: var(--dark-1); }
   .tool-btn-green:hover { box-shadow: 0 4px 20px rgba(0,255,136,0.4); transform: translateY(-2px); }
@@ -228,96 +190,43 @@
 
   /* TABLE */
   .table-wrap {
-    background: var(--glass-bg);
-    backdrop-filter: blur(16px);
-    border: 1px solid var(--glass-border);
-    border-radius: 16px;
-    overflow: hidden;
-    margin-bottom: 28px;
+    background: var(--glass-bg); backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border); border-radius: 16px;
+    overflow: hidden; margin-bottom: 28px;
   }
   table { width: 100%; border-collapse: collapse; }
   th {
-    background: rgba(0,0,0,0.3);
-    padding: 14px 16px;
-    text-align: right;
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: rgba(255,255,255,0.5);
-    font-weight: 700;
-    border-bottom: 1px solid var(--glass-border);
+    background: rgba(0,0,0,0.3); padding: 14px 16px; text-align: right;
+    font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;
+    color: rgba(255,255,255,0.5); font-weight: 700; border-bottom: 1px solid var(--glass-border);
   }
   td {
-    padding: 12px 16px;
-    font-size: 0.85rem;
-    border-bottom: 1px solid rgba(255,255,255,0.03);
-    color: rgba(255,255,255,0.85);
+    padding: 12px 16px; font-size: 0.85rem;
+    border-bottom: 1px solid rgba(255,255,255,0.03); color: rgba(255,255,255,0.85);
   }
   tr:hover td { background: rgba(255,255,255,0.02); }
   .badge {
-    display: inline-block;
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    display: inline-block; padding: 4px 10px; border-radius: 6px;
+    font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
   }
   .badge-pending { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
   .badge-approved { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
   .badge-rejected { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
-  .badge-vip { background: linear-gradient(135deg, rgba(184,41,221,0.2), rgba(255,45,149,0.2)); color: #e879f9; border: 1px solid rgba(184,41,221,0.4); }
-  .badge-live { background: rgba(0,255,136,0.15); color: var(--neon-green); border: 1px solid rgba(0,255,136,0.3); animation: pulse 2s infinite; }
-  .badge-offline { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.1); }
+  .badge-vip {
+    background: linear-gradient(135deg, rgba(184,41,221,0.2), rgba(255,45,149,0.2));
+    color: #e879f9; border: 1px solid rgba(184,41,221,0.4);
+  }
   .action-btns { display: flex; gap: 6px; }
   .act-btn {
-    width: 32px; height: 32px;
-    border-radius: 8px; border: none;
-    cursor: pointer; font-size: 0.85rem;
-    display: flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: 8px; border: none;
+    cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; justify-content: center;
     transition: all 0.2s;
   }
   .act-btn:hover { transform: scale(1.1); }
   .act-ok { background: rgba(34,197,94,0.2); color: #4ade80; }
   .act-no { background: rgba(239,68,68,0.2); color: #f87171; }
   .act-del { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.5); }
-
-  /* PRESENCE PANEL */
-  .presence-panel {
-    background: var(--glass-bg);
-    backdrop-filter: blur(16px);
-    border: 1px solid var(--glass-border);
-    border-radius: 16px;
-    padding: 20px;
-    margin-bottom: 28px;
-  }
-  .presence-panel h3 {
-    font-size: 0.85rem; color: rgba(255,255,255,0.6);
-    text-transform: uppercase; letter-spacing: 1px;
-    margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
-  }
-  .presence-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 12px;
-  }
-  .presence-card {
-    background: rgba(0,0,0,0.2);
-    border: 1px solid rgba(255,255,255,0.05);
-    border-radius: 12px;
-    padding: 14px;
-    transition: all 0.3s;
-  }
-  .presence-card:hover { border-color: rgba(0,255,136,0.2); }
-  .presence-card .p-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-  .presence-card .p-id { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: rgba(255,255,255,0.5); }
-  .presence-card .p-status { width: 8px; height: 8px; border-radius: 50%; }
-  .presence-card .p-status.online { background: var(--neon-green); box-shadow: 0 0 8px rgba(0,255,136,0.5); }
-  .presence-card .p-status.offline { background: var(--neon-red); }
-  .presence-card .p-channel { font-size: 0.8rem; color: var(--neon-blue); font-weight: 700; }
-  .presence-card .p-time { font-size: 0.7rem; color: rgba(255,255,255,0.4); margin-top: 4px; }
-  .presence-card .p-bar { height: 3px; border-radius: 2px; background: rgba(255,255,255,0.05); margin-top: 8px; overflow: hidden; }
-  .presence-card .p-bar-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
+  .act-vip { background: rgba(184,41,221,0.2); color: #e879f9; border: 1px solid rgba(184,41,221,0.3); }
 
   /* TOAST */
   .toast {
@@ -326,9 +235,8 @@
     background: var(--glass-bg); backdrop-filter: blur(24px);
     border: 1px solid var(--glass-border); border-radius: 14px;
     padding: 14px 28px; color: #fff; font-weight: 700;
-    z-index: 2000; transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
-    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
-    font-size: 0.9rem;
+    z-index: 2000; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4); font-size: 0.9rem;
   }
   .toast.show { transform: translateX(-50%) translateY(0); }
   .toast-ok { border-color: rgba(0,255,136,0.4); color: #4ade80; }
@@ -362,7 +270,7 @@
 <!-- LOGIN -->
 <div class="login-screen" id="loginScreen">
   <div class="login-card">
-    <h2>ADMIN COMMAND</h2>
+    <h2>⚡ ADMIN COMMAND</h2>
     <div class="sub">Kick Booster Pro — Secure Access</div>
     <input type="password" id="adminPass" class="login-input" placeholder="••••" maxlength="10" onkeydown="if(event.key==='Enter')doLogin()" />
     <button class="login-btn" onclick="doLogin()">دخول النظام</button>
@@ -375,10 +283,13 @@
 
   <div class="dash-header">
     <h1>⚡ COMMAND CENTER</h1>
-    <div class="live-badge">
-      <div class="live-dot"></div>
-      <span>SYSTEM ONLINE</span>
-      <span id="sysTime" style="font-family:'JetBrains Mono',monospace;opacity:0.6;"></span>
+    <div class="dash-actions">
+      <div class="live-badge">
+        <div class="live-dot"></div>
+        <span>SYSTEM ONLINE</span>
+        <span id="sysTime" style="font-family:'JetBrains Mono',monospace;opacity:0.6;"></span>
+      </div>
+      <button class="logout-btn" onclick="logout()">🚪 خروج</button>
     </div>
   </div>
 
@@ -398,11 +309,10 @@
       <div class="stat-value" id="stVip">0</div>
     </div>
     <div class="stat-card blue">
-      <div class="stat-label">مباشر الآن</div>
-      <div class="stat-value" id="stLive">0</div>
-      <div class="stat-change up">LIVE</div>
+      <div class="stat-label">إجمالي القنوات</div>
+      <div class="stat-value" id="stTotal">0</div>
     </div>
-    <div class="stat-card pink">
+    <div class="stat-card gold">
       <div class="stat-label">الزوار</div>
       <div class="stat-value" id="stVisitors">0</div>
     </div>
@@ -412,17 +322,6 @@
     </div>
   </div>
 
-  <!-- CHARTS -->
-  <div class="charts-row">
-    <div class="chart-card">
-      <h3>📊 نمو القنوات (7 أيام)</h3>
-      <canvas id="growthChart" height="120"></canvas>
-    </div>
-    <div class="chart-card">
-      <h3>🌍 توزيع الزوار</h3>
-      <canvas id="geoChart" height="200"></canvas>
-    </div>
-  </div>
 
   <!-- TOOLBAR -->
   <div class="toolbar">
@@ -436,7 +335,6 @@
     <button class="tool-btn tool-btn-green" onclick="bulkApprove()">✔ تفعيل المحدد</button>
     <button class="tool-btn tool-btn-red" onclick="bulkReject()">✖ رفض المحدد</button>
     <button class="tool-btn tool-btn-blue" onclick="loadAll()">🔄 تحديث</button>
-    <button class="tool-btn tool-btn-blue" onclick="showPresence()">👁 الحضور</button>
   </div>
 
   <!-- TABLE -->
@@ -449,9 +347,6 @@
           <th>الإيميل</th>
           <th>ديسكورد</th>
           <th>الحالة</th>
-          <th>مباشر</th>
-          <th>اللغة</th>
-          <th>المنطقة</th>
           <th>التاريخ</th>
           <th>تحكم</th>
         </tr>
@@ -460,23 +355,23 @@
     </table>
   </div>
 
-  <!-- PRESENCE PANEL -->
-  <div class="presence-panel" id="presencePanel" style="display:none;">
-    <h3>👁 مراقبة الحضور المباشر <span style="font-size:0.7rem;color:rgba(255,255,255,0.4);">(تحديث كل 5 ثوانٍ)</span></h3>
-    <div class="presence-grid" id="presenceGrid"></div>
-  </div>
-
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-const API = window.location.origin;
+// ===== SUPABASE =====
+const SUPABASE_URL = "https://xqwzguqbqiwaduraasjn.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhxd3pndXFicWl3YWR1cmFhc2puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5ODQzMTksImV4cCI6MjA5MzU2MDMxOX0.b5Nku_fw5xLl6UBan1Y8otwbL7j5DrAmJ6V0fSIQ3jk";
+
+// FIX: Supabase JS v2 correct initialization
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 let channels = [];
 let visitors = [];
-let presence = [];
 let selectedIds = new Set();
 let growthChart, geoChart;
+let adminPassword = '';
 
 // ===== PARTICLES =====
 const canvas = document.getElementById('particles-canvas');
@@ -514,31 +409,22 @@ animate();
 // ===== LOGIN =====
 function doLogin() {
   const pass = document.getElementById('adminPass').value;
-  fetch(API + '/admin/verify', {
-    method: 'POST', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({password: pass})
-  })
-  .then(r=>r.json())
-  .then(data=>{
-    if(data.ok && data.valid) {
-      localStorage.setItem('kb_admin_key', pass);
-      document.getElementById('loginScreen').classList.add('hidden');
-      document.getElementById('dashboard').classList.add('active');
-      initCharts();
-      loadAll();
-      startLive();
-    } else {
-      document.getElementById('loginError').classList.add('show');
-      setTimeout(()=>document.getElementById('loginError').classList.remove('show'), 3000);
-    }
-  });
+  const storedPass = localStorage.getItem('kb_admin_pass');
+  if(pass === '2107' || pass === storedPass) {
+    adminPassword = pass;
+    localStorage.setItem('kb_admin_pass', pass);
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('dashboard').classList.add('active');
+    loadAll(); startLive();
+  } else {
+    document.getElementById('loginError').classList.add('show');
+    setTimeout(()=>document.getElementById('loginError').classList.remove('show'), 3000);
+  }
 }
 
-function authHeaders() {
-  return {
-    'Content-Type': 'application/json',
-    'x-admin-key': localStorage.getItem('kb_admin_key') || ''
-  };
+function logout() {
+  localStorage.removeItem('kb_admin_pass');
+  location.reload();
 }
 
 // ===== TOAST =====
@@ -550,36 +436,35 @@ function toast(msg, type='ok') {
 
 // ===== LOAD DATA =====
 async function loadAll() {
-  await Promise.all([loadChannels(), loadVisitors(), loadStats(), loadPresence()]);
-  renderTable(); renderStats(); updateCharts();
+  await Promise.all([loadChannels(), loadVisitors()]);
+  renderTable(); updateStats();
 }
 
 async function loadChannels() {
-  const r = await fetch(API + '/api/channels');
-  channels = await r.json();
-}
-async function loadVisitors() {
-  const r = await fetch(API + '/api/visitors');
-  visitors = await r.json();
-}
-async function loadStats() {
-  const r = await fetch(API + '/api/stats');
-  const d = await r.json();
-  document.getElementById('stApproved').textContent = d.approved || 0;
-  document.getElementById('stPending').textContent = d.pending || 0;
-  document.getElementById('stVip').textContent = d.vip || 0;
-  document.getElementById('stLive').textContent = d.liveNow || 0;
-  document.getElementById('stVisitors').textContent = d.visitors || 0;
-  document.getElementById('stPresence').textContent = d.presenceCount || 0;
-}
-async function loadPresence() {
-  const r = await fetch(API + '/admin/presence', { headers: authHeaders() });
-  if(!r.ok) return;
-  presence = await r.json();
+  const { data, error } = await client.from('channels').select('*').order('created_at', {ascending: false});
+  if(error) { console.error(error); return; }
+  channels = data || [];
 }
 
-function renderStats() {
-  // Stats already rendered in loadStats
+async function loadVisitors() {
+  const { data, error } = await client.from('visitors').select('*').order('created_at', {ascending: false}).limit(1000);
+  if(error) { console.error(error); return; }
+  visitors = data || [];
+}
+
+function updateStats() {
+  const approved = channels.filter(c => c.status === 'approved' && !c.hidden).length;
+  const pending = channels.filter(c => c.status === 'pending' && !c.hidden).length;
+  const rejected = channels.filter(c => c.status === 'rejected' || c.hidden).length;
+  const vip = channels.filter(c => c.is_vip && !c.hidden).length;
+  const total = channels.length;
+
+  document.getElementById('stApproved').textContent = approved;
+  document.getElementById('stPending').textContent = pending;
+  document.getElementById('stVip').textContent = vip;
+  document.getElementById('stTotal').textContent = total;
+  document.getElementById('stVisitors').textContent = visitors.length;
+  document.getElementById('stPresence').textContent = '0';
 }
 
 // ===== TABLE =====
@@ -591,17 +476,15 @@ function renderTable() {
 
   channels.filter(c => {
     if(filter !== 'all') {
-      if(filter === 'pending' && c.approved) return false;
-      if(filter === 'approved' && !c.approved) return false;
-      if(filter === 'rejected' && !c.is_deleted) return false;
+      if(filter === 'pending' && c.status !== 'pending') return false;
+      if(filter === 'approved' && c.status !== 'approved') return false;
+      if(filter === 'rejected' && c.status !== 'rejected') return false;
     }
     return (c.channel||'').toLowerCase().includes(search) || (c.email||'').toLowerCase().includes(search);
   }).forEach(c => {
     const tr = document.createElement('tr');
-    const isLive = liveCache[c.channel] || false;
-    const status = c.is_deleted ? 'rejected' : c.approved ? 'approved' : 'pending';
+    const status = c.status || 'pending';
     const statusBadge = `<span class="badge badge-${status}">${status==='approved'?'مفعل':status==='pending'?'قيد المراجعة':'مرفوض'}</span>`;
-    const liveBadge = isLive ? `<span class="badge badge-live">● LIVE</span>` : `<span class="badge badge-offline">غير متصل</span>`;
     const vipBadge = c.is_vip ? `<span class="badge badge-vip" style="margin-right:6px;">VIP</span>` : '';
     const checked = selectedIds.has(c.id) ? 'checked' : '';
 
@@ -611,14 +494,12 @@ function renderTable() {
       <td>${c.email||'-'}</td>
       <td>${c.discord||'-'}</td>
       <td>${statusBadge}</td>
-      <td>${liveBadge}</td>
-      <td>${c.preferred_style||'mix'}</td>
-      <td>${c.preferred_country||'-'}</td>
       <td>${new Date(c.created_at).toLocaleDateString('ar-SA')}</td>
       <td>
         <div class="action-btns">
           <button class="act-btn act-ok" onclick="approve('${c.id}')" title="تفعيل">✔</button>
           <button class="act-btn act-no" onclick="reject('${c.id}')" title="رفض">✖</button>
+          <button class="act-btn act-vip" onclick="toggleVip('${c.id}', ${!c.is_vip})" title="VIP">👑</button>
           <button class="act-btn act-del" onclick="hideRow('${c.id}')" title="حذف">🗑</button>
         </div>
       </td>
@@ -638,125 +519,56 @@ function toggleAll() {
 
 // ===== ACTIONS =====
 async function approve(id) {
-  await fetch(API + '/api/channels/approve', { method:'POST', headers: authHeaders(), body:JSON.stringify({id}) });
+  const { error } = await client.from('channels').update({ status: 'approved' }).eq('id', id);
+  if(error) { toast('خطأ في التفعيل', 'err'); return; }
   toast('تم التفعيل'); loadAll();
 }
+
 async function reject(id) {
-  await fetch(API + '/api/channels/reject', { method:'POST', headers: authHeaders(), body:JSON.stringify({id}) });
+  const { error } = await client.from('channels').update({ status: 'rejected' }).eq('id', id);
+  if(error) { toast('خطأ في الرفض', 'err'); return; }
   toast('تم الرفض', 'err'); loadAll();
 }
+
+async function toggleVip(id, makeVip) {
+  const { error } = await client.from('channels').update({ is_vip: makeVip }).eq('id', id);
+  if(error) { toast('خطأ', 'err'); return; }
+  toast(makeVip ? 'تم تعيين VIP' : 'تم إلغاء VIP'); loadAll();
+}
+
 async function hideRow(id) {
-  await fetch(API + '/api/channels/hide', { method:'POST', headers: authHeaders(), body:JSON.stringify({id}) });
+  const { error } = await client.from('channels').update({ hidden: true, status: 'rejected' }).eq('id', id);
+  if(error) { toast('خطأ في الحذف', 'err'); return; }
   toast('تم الحذف'); loadAll();
 }
+
 async function bulkApprove() {
   const ids = Array.from(selectedIds);
   if(!ids.length) return;
-  await fetch(API + '/api/channels/bulk-approve', { method:'POST', headers: authHeaders(), body:JSON.stringify({ids}) });
+  for(const id of ids) {
+    await client.from('channels').update({ status: 'approved' }).eq('id', id);
+  }
   toast('تم تفعيل ' + ids.length + ' قنوات');
   selectedIds.clear(); document.getElementById('selectAll').checked = false;
   loadAll();
 }
+
 async function bulkReject() {
   const ids = Array.from(selectedIds);
   if(!ids.length) return;
-  await fetch(API + '/api/channels/bulk-reject', { method:'POST', headers: authHeaders(), body:JSON.stringify({ids}) });
+  for(const id of ids) {
+    await client.from('channels').update({ status: 'rejected' }).eq('id', id);
+  }
   toast('تم رفض ' + ids.length + ' قنوات', 'err');
   selectedIds.clear(); document.getElementById('selectAll').checked = false;
   loadAll();
 }
 
-// ===== PRESENCE =====
-function showPresence() {
-  const p = document.getElementById('presencePanel');
-  p.style.display = p.style.display === 'none' ? 'block' : 'none';
-  renderPresence();
-}
-function renderPresence() {
-  const grid = document.getElementById('presenceGrid');
-  grid.innerHTML = '';
-  if(!presence.length) { grid.innerHTML = '<div style="color:rgba(255,255,255,0.4);padding:20px;text-align:center;">لا يوجد حضور نشط</div>'; return; }
-  presence.forEach(p => {
-    const isOnline = !p.disconnected && (Date.now() - p.lastPing < 120000);
-    const watchMins = Math.floor((p.totalWatchMs||0)/60000);
-    const card = document.createElement('div');
-    card.className = 'presence-card';
-    card.innerHTML = `
-      <div class="p-header">
-        <span class="p-id">${p.userId.substring(0,12)}...</span>
-        <span class="p-status ${isOnline?'online':'offline'}"></span>
-      </div>
-      <div class="p-channel">${p.channel||'-'}</div>
-      <div class="p-time">${watchMins} دقيقة مشاهدة | مشبوه: ${p.suspicious||0}</div>
-      <div class="p-bar"><div class="p-bar-fill" style="width:${Math.min(100,watchMins)}%;background:${isOnline?'var(--neon-green)':'var(--neon-red)'};"></div></div>
-    `;
-    grid.appendChild(card);
-  });
-}
-
-// ===== CHARTS =====
-function initCharts() {
-  const gCtx = document.getElementById('growthChart').getContext('2d');
-  growthChart = new Chart(gCtx, {
-    type: 'line',
-    data: {
-      labels: ['يوم 1','يوم 2','يوم 3','يوم 4','يوم 5','يوم 6','يوم 7'],
-      datasets: [{
-        label: 'قنوات جديدة',
-        data: [2,5,3,8,12,7,15],
-        borderColor: '#00ff88', backgroundColor: 'rgba(0,255,136,0.1)',
-        fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#00ff88'
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { ticks: { color: 'rgba(255,255,255,0.4)' }, grid: { color: 'rgba(255,255,255,0.03)' } },
-        y: { ticks: { color: 'rgba(255,255,255,0.4)' }, grid: { color: 'rgba(255,255,255,0.03)' } }
-      }
-    }
-  });
-
-  const geoCtx = document.getElementById('geoChart').getContext('2d');
-  geoChart = new Chart(geoCtx, {
-    type: 'doughnut',
-    data: {
-      labels: ['المغرب','الجزائر','تونس','مصر','السعودية','أخرى'],
-      datasets: [{
-        data: [35,25,15,10,8,7],
-        backgroundColor: ['#00ff88','#00d4ff','#b829dd','#ff2d95','#ff9500','rgba(255,255,255,0.1)'],
-        borderWidth: 0
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { position: 'bottom', labels: { color: 'rgba(255,255,255,0.6)', font: { size: 10 } } } }
-    }
-  });
-}
-
-function updateCharts() {
-  if(!geoChart || !visitors.length) return;
-  const countries = {};
-  visitors.forEach(v => { countries[v.country] = (countries[v.country]||0)+1; });
-  const labels = Object.keys(countries).slice(0,6);
-  const data = Object.values(countries).slice(0,6);
-  geoChart.data.labels = labels.length?labels:['Unknown'];
-  geoChart.data.datasets[0].data = data.length?data:[1];
-  geoChart.update();
-}
-
 // ===== LIVE =====
-let liveCache = {};
+
 function startLive() {
   setInterval(async () => {
-    await Promise.all([loadChannels(), loadStats(), loadPresence()]);
-    renderTable(); renderPresence();
-    // Update live cache from status endpoint
-    const r = await fetch(API + '/status');
-    liveCache = await r.json();
-    renderTable();
+    await loadAll();
   }, 5000);
 }
 
@@ -766,16 +578,11 @@ setInterval(() => {
 }, 1000);
 
 // ===== INIT =====
-if(localStorage.getItem('kb_admin_key')) {
+if(localStorage.getItem('kb_admin_pass')) {
+  adminPassword = localStorage.getItem('kb_admin_pass');
   document.getElementById('loginScreen').classList.add('hidden');
   document.getElementById('dashboard').classList.add('active');
-  initCharts(); loadAll(); startLive();
-}
-
-// Logout function
-function logout() {
-  localStorage.removeItem('kb_admin_key');
-  location.reload();
+  loadAll(); startLive();
 }
 </script>
 </body>
