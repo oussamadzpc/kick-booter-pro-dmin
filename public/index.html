@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -391,7 +392,6 @@
 
   <!-- HERO -->
   <section class="hero">
-    <!-- INLINE SVG LOGO (no external file needed) -->
     <svg class="hero-logo" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -617,7 +617,7 @@
       <div class="form-grid">
         <div class="form-group">
           <label data-i18n="lbl_channel">اسم القناة</label>
-          <input id="channel" type="text" placeholder="xenon" autocomplete="off" />
+          <input id="channel" type="text" data-i18n-placeholder="ph_channel" placeholder="أدخل اسم قناتك على Kick" autocomplete="off" />
         </div>
         <div class="form-group">
           <label data-i18n="lbl_email">البريد الإلكتروني</label>
@@ -684,6 +684,7 @@ const i18n = {
     contact_desc: "انضم إلى مجتمعنا وكن جزءاً من ثورة البث المباشر! 💚",
     reg_title: "سجل الآن وانطلق",
     lbl_channel: "اسم القناة", lbl_email: "البريد الإلكتروني", lbl_discord: "ديسكورد",
+    ph_channel: "أدخل اسم قناتك على Kick",
     btn_register: "تسجيل الآن", btn_check: "فحص الحالة", btn_download: "تحميل الإكستنشن",
     f_welcome: "الترحيب", f_ext: "الإكستنشن", f_rules: "القوانين", f_contact: "اتصل بنا", f_reg: "التسجيل"
   },
@@ -702,6 +703,7 @@ const i18n = {
     contact_desc: "Rejoignez notre communauté et faites partie de la révolution du streaming! 💚",
     reg_title: "Inscrivez-vous maintenant",
     lbl_channel: "Nom de la chaîne", lbl_email: "Email", lbl_discord: "Discord",
+    ph_channel: "Entrez votre chaîne Kick",
     btn_register: "S'inscrire", btn_check: "Vérifier le statut", btn_download: "Télécharger l'extension",
     f_welcome: "Accueil", f_ext: "Extension", f_rules: "Règles", f_contact: "Contact", f_reg: "Inscription"
   },
@@ -720,6 +722,7 @@ const i18n = {
     contact_desc: "Join our community and be part of the streaming revolution! 💚",
     reg_title: "Register Now and Launch",
     lbl_channel: "Channel Name", lbl_email: "Email", lbl_discord: "Discord",
+    ph_channel: "Your Channel on Kick",
     btn_register: "Register Now", btn_check: "Check Status", btn_download: "Download Extension",
     f_welcome: "Welcome", f_ext: "Extension", f_rules: "Rules", f_contact: "Contact", f_reg: "Register"
   }
@@ -739,6 +742,10 @@ function setLang(lang) {
         el.textContent = i18n[lang][key];
       }
     }
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.dataset.i18nPlaceholder;
+    if(i18n[lang][key]) el.placeholder = i18n[lang][key];
   });
   document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
   document.body.style.fontFamily = lang === 'ar' ? "'Cairo', sans-serif" : "'Inter', sans-serif";
