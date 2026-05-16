@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kick Booster Pro — Next Gen Stream Power</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --neon-green: #00ff88; --neon-blue: #00d4ff; --neon-purple: #b829dd;
+    --neon-pink: #ff2d95; --neon-orange: #ff9500; --neon-gold: #ffd700;
+    --glass-bg: rgba(15, 23, 42, 0.5); --glass-border: rgba(255,255,255,0.08);
+    --dark-1: #020617; --dark-2: #0f172a;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Cairo', 'Inter', sans-serif;
+    background: var(--dark-1); color: #fff;
+    min-height: 100vh; overflow-x: hidden; position: relative;
+  }
+
+  /* ===== PARTICLES ===== */
+  #particles-canvas {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 0; pointer-events: none;
+  }
+  .galaxy-bg {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 0; background: url('galaxy-bg.jpg') center/cover no-repeat;
+    opacity: 0.35; mix-blend-mode: screen;
+  }
+  .galaxy-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 1;
+    background: radial-gradient(ellipse at 20% 50%, rgba(184,41,221,0.12) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(0,212,255,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(0,255,136,0.06) 0%, transparent 50%);
+  }
+  .orb {
+    position: fixed; border-radius: 50%; filter: blur(100px); z-index: 1;
+    animation: orbFloat 25s ease-in-out infinite;
+  }
+  .orb-1 { width: 500px; height: 500px; background: var(--neon-purple); top: -150px; right: -150px; opacity: 0.2; }
+  .orb-2 { width: 400px; height: 400px; background: var(--neon-blue); bottom: -100px; left: -100px; opacity: 0.15; animation-delay: -8s; }
+  .orb-3 { width: 350px; height: 350px; background: var(--neon-green); top: 50%; left: 40%; opacity: 0.1; animation-delay: -16s; }
+  @keyframes orbFloat {
+    0%,100% { transform: translate(0,0) scale(1); }
+    33% { transform: translate(40px,-50px) scale(1.08); }
+    66% { transform: translate(-30px,30px) scale(0.95); }
+  }
+
+  /* ===== LANGUAGE SWITCHER ===== */
+  .lang-switch {
+    position: fixed; top: 20px; left: 20px; z-index: 1000;
+    display: flex; gap: 8px;
+  }
+  .lang-btn {
+    padding: 8px 16px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(0,0,0,0.4); color: rgba(255,255,255,0.6);
+    font-family: 'Inter', sans-serif; font-size: 0.75rem; font-weight: 600;
+    cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px;
+    backdrop-filter: blur(10px);
+  }
+  .lang-btn:hover, .lang-btn.active {
+    border-color: var(--neon-green); color: var(--neon-green);
+    box-shadow: 0 0 20px rgba(0,255,136,0.2); background: rgba(0,255,136,0.1);
+  }
+
+  /* ===== MAIN WRAP ===== */
+  .main-wrap { position: relative; z-index: 10; min-height: 100vh; }
+
+  /* ===== HERO SECTION ===== */
+  .hero {
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; padding: 40px 20px;
+    text-align: center; position: relative;
+  }
+  .hero-logo {
+    width: 140px; height: auto; margin-bottom: 24px;
+    filter: drop-shadow(0 0 30px rgba(0,255,136,0.4));
+    animation: logoPulse 3s ease-in-out infinite;
+  }
+  @keyframes logoPulse {
+    0%,100% { filter: drop-shadow(0 0 30px rgba(0,255,136,0.4)); transform: scale(1); }
+    50% { filter: drop-shadow(0 0 60px rgba(0,255,136,0.7)); transform: scale(1.05); }
+  }
+  .hero h1 {
+    font-family: 'Orbitron', sans-serif; font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 900; letter-spacing: 4px; margin-bottom: 12px;
+    background: linear-gradient(135deg, var(--neon-green), var(--neon-blue), var(--neon-purple));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .hero .subtitle {
+    color: rgba(255,255,255,0.5); font-size: 0.9rem; letter-spacing: 6px;
+    text-transform: uppercase; margin-bottom: 40px;
+  }
+  .scroll-hint {
+    position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    color: rgba(255,255,255,0.3); font-size: 0.75rem; letter-spacing: 2px;
+    animation: bounce 2s infinite;
+  }
+  .scroll-hint .arrow {
+    width: 24px; height: 24px; border-right: 2px solid var(--neon-green);
+    border-bottom: 2px solid var(--neon-green); transform: rotate(45deg);
+    animation: arrowBounce 2s infinite;
+  }
+  @keyframes bounce { 0%,100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(10px); } }
+  @keyframes arrowBounce { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }
+
+  /* ===== GLASS CARD ===== */
+  .glass-card {
+    background: var(--glass-bg); backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid var(--glass-border); border-radius: 24px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+    padding: 40px 32px; width: 100%; max-width: 900px;
+    position: relative; overflow: hidden; transition: all 0.4s ease;
+  }
+  .glass-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 48px rgba(0,255,136,0.08), 0 8px 32px rgba(0,0,0,0.4);
+    border-color: rgba(0,255,136,0.15);
+  }
+  .glass-card::before {
+    content: ''; position: absolute; top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: conic-gradient(from 0deg, transparent, var(--neon-green), var(--neon-blue), var(--neon-purple), transparent);
+    opacity: 0.03; animation: rotate 15s linear infinite;
+  }
+  @keyframes rotate { 100% { transform: rotate(360deg); } }
+
+  /* ===== SECTIONS ===== */
+  .section { padding: 80px 20px; display: flex; justify-content: center; }
+  .section-title {
+    font-family: 'Orbitron', sans-serif; font-size: 1.5rem; font-weight: 700;
+    margin-bottom: 24px; display: flex; align-items: center; gap: 12px;
+    position: relative; z-index: 2;
+  }
+  .section-title .icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.2);
+  }
+  .section-title.green { color: var(--neon-green); text-shadow: 0 0 20px rgba(0,255,136,0.3); }
+  .section-title.blue { color: var(--neon-blue); text-shadow: 0 0 20px rgba(0,212,255,0.3); }
+  .section-title.purple { color: var(--neon-purple); text-shadow: 0 0 20px rgba(184,41,221,0.3); }
+  .section-title.orange { color: var(--neon-orange); text-shadow: 0 0 20px rgba(255,149,0,0.3); }
+
+  /* ===== ACCORDION ===== */
+  .accordion { position: relative; z-index: 2; }
+  .accordion-item {
+    margin-bottom: 16px; border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.06);
+    background: rgba(0,0,0,0.2); overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  .accordion-item:hover { border-color: rgba(255,255,255,0.12); }
+  .accordion-header {
+    padding: 20px 24px; display: flex; align-items: center; justify-content: space-between;
+    cursor: pointer; transition: all 0.3s; user-select: none;
+  }
+  .accordion-header:hover { background: rgba(255,255,255,0.03); }
+  .accordion-header h3 {
+    font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 12px;
+  }
+  .accordion-header .chevron {
+    width: 28px; height: 28px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,0.05); transition: all 0.3s;
+    font-size: 0.8rem;
+  }
+  .accordion-item.active .chevron { transform: rotate(180deg); background: var(--neon-green); color: var(--dark-1); }
+  .accordion-body {
+    max-height: 0; overflow: hidden; transition: max-height 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    padding: 0 24px;
+  }
+  .accordion-item.active .accordion-body {
+    max-height: 2000px; padding: 0 24px 24px 24px;
+  }
+  .accordion-content {
+    color: rgba(255,255,255,0.75); line-height: 2;
+    font-size: 0.95rem;
+  }
+  .accordion-content strong { color: var(--neon-green); }
+  .accordion-content ul { list-style: none; padding: 0; }
+  .accordion-content li {
+    padding: 8px 0; padding-right: 24px; position: relative;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+  .accordion-content li::before {
+    content: '▸'; position: absolute; right: 0;
+    color: var(--neon-green); font-weight: 700;
+  }
+  .accordion-content .highlight {
+    background: rgba(0,255,136,0.08); padding: 2px 8px;
+    border-radius: 4px; color: var(--neon-green); font-weight: 600;
+  }
+
+  /* ===== FEATURE CARDS ===== */
+  .feature-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px; margin-top: 20px;
+  }
+  .feature-card {
+    background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px; padding: 20px; transition: all 0.3s;
+  }
+  .feature-card:hover {
+    border-color: var(--neon-green); transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,255,136,0.1);
+  }
+  .feature-card .f-icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; margin-bottom: 12px;
+    background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.2);
+  }
+  .feature-card h4 { font-size: 0.95rem; margin-bottom: 8px; color: #fff; }
+  .feature-card p { font-size: 0.8rem; color: rgba(255,255,255,0.5); line-height: 1.6; }
+
+  /* ===== VIP SECTION ===== */
+  .vip-banner {
+    background: linear-gradient(135deg, rgba(184,41,221,0.15), rgba(255,45,149,0.15));
+    border: 1px solid rgba(184,41,221,0.3); border-radius: 16px;
+    padding: 24px; margin-top: 20px; position: relative; overflow: hidden;
+  }
+  .vip-banner::before {
+    content: 'VIP'; position: absolute; top: -10px; right: 20px;
+    font-family: 'Orbitron', sans-serif; font-size: 4rem; font-weight: 900;
+    opacity: 0.05; color: var(--neon-purple);
+  }
+  .vip-banner h4 { color: var(--neon-purple); font-size: 1.1rem; margin-bottom: 12px; }
+  .vip-banner ul { list-style: none; padding: 0; }
+  .vip-banner li {
+    padding: 6px 0; padding-right: 20px; position: relative;
+    color: rgba(255,255,255,0.7); font-size: 0.85rem;
+  }
+  .vip-banner li::before { content: '◆'; position: absolute; right: 0; color: var(--neon-pink); }
+
+  /* ===== SOCIAL SECTION ===== */
+  .social-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 20px;
+  }
+  @media (min-width: 600px) { .social-grid { grid-template-columns: repeat(4, 1fr); } }
+  .social-card {
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px; border-radius: 14px;
+    background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06);
+    text-decoration: none; color: #fff; transition: all 0.3s;
+  }
+  .social-card:hover {
+    transform: translateY(-4px); border-color: var(--neon-blue);
+    box-shadow: 0 8px 24px rgba(0,212,255,0.15);
+  }
+  .social-card .s-icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; flex-shrink: 0;
+  }
+  .social-card.facebook .s-icon { background: rgba(24,119,242,0.15); color: #1877f2; border: 1px solid rgba(24,119,242,0.3); }
+  .social-card.discord .s-icon { background: rgba(88,101,242,0.15); color: #5865f2; border: 1px solid rgba(88,101,242,0.3); }
+  .social-card.youtube .s-icon { background: rgba(255,0,0,0.15); color: #ff0000; border: 1px solid rgba(255,0,0,0.3); }
+  .social-card.kick .s-icon { background: rgba(83,252,83,0.15); color: #53fc53; border: 1px solid rgba(83,252,83,0.3); }
+  .social-card .s-info h4 { font-size: 0.85rem; margin-bottom: 2px; }
+  .social-card .s-info span { font-size: 0.7rem; color: rgba(255,255,255,0.4); }
+
+  /* ===== REGISTRATION FORM ===== */
+  .form-grid {
+    display: grid; grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  @media (min-width: 600px) { .form-grid { grid-template-columns: 1fr 1fr; } }
+  .form-group { position: relative; z-index: 2; }
+  .form-group.full { grid-column: 1 / -1; }
+  .form-group label {
+    display: block; color: rgba(255,255,255,0.6); font-size: 0.7rem;
+    margin-bottom: 6px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+  }
+  .form-group input, .form-group select {
+    width: 100%; padding: 14px 16px; border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3);
+    color: #fff; font-family: 'Cairo', sans-serif; font-size: 0.9rem;
+    outline: none; transition: all 0.3s ease;
+  }
+  .form-group input:focus, .form-group select:focus {
+    border-color: var(--neon-green);
+    box-shadow: 0 0 0 3px rgba(0,255,136,0.1), 0 0 20px rgba(0,255,136,0.05);
+    background: rgba(0,0,0,0.5);
+  }
+  .form-group input::placeholder { color: rgba(255,255,255,0.25); }
+
+  /* ===== NEON BUTTON ===== */
+  .neon-btn {
+    width: 100%; padding: 16px; border: none; border-radius: 14px;
+    font-family: 'Cairo', sans-serif; font-size: 1rem; font-weight: 700;
+    cursor: pointer; position: relative; overflow: hidden;
+    transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 2px;
+    z-index: 2;
+  }
+  .neon-btn-primary {
+    background: linear-gradient(135deg, var(--neon-green), #00cc6a);
+    color: var(--dark-1);
+    box-shadow: 0 4px 20px rgba(0,255,136,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+  }
+  .neon-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0,255,136,0.5), 0 0 60px rgba(0,255,136,0.2);
+  }
+  .neon-btn-secondary {
+    background: transparent; color: var(--neon-blue);
+    border: 1px solid rgba(0,212,255,0.3); margin-top: 10px;
+  }
+  .neon-btn-secondary:hover {
+    background: rgba(0,212,255,0.1); border-color: var(--neon-blue);
+    box-shadow: 0 0 20px rgba(0,212,255,0.2);
+  }
+
+  /* ===== STATUS BOX ===== */
+  .status-box {
+    margin-top: 20px; padding: 14px 18px; border-radius: 12px;
+    text-align: center; font-weight: 700; font-size: 0.9rem;
+    display: none; position: relative; z-index: 2;
+    animation: slideUp 0.4s ease;
+  }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .status-pending { background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); color: #fbbf24; }
+  .status-approved { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); color: #4ade80; }
+  .status-rejected { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #f87171; }
+
+  /* ===== DOWNLOAD BUTTON ===== */
+  .download-wrap { margin-top: 16px; display: none; animation: slideUp 0.5s ease; }
+  .download-wrap a { text-decoration: none; }
+  .download-btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; padding: 16px; border-radius: 14px;
+    background: linear-gradient(135deg, var(--neon-blue), #0088cc);
+    color: #fff; font-weight: 700; font-size: 0.95rem;
+    border: none; cursor: pointer; transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0,212,255,0.3); z-index: 2; position: relative;
+  }
+  .download-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,212,255,0.5); }
+
+  /* ===== FOOTER ===== */
+  .site-footer {
+    padding: 40px 20px; text-align: center;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    background: rgba(0,0,0,0.3); backdrop-filter: blur(10px);
+  }
+  .site-footer p { color: rgba(255,255,255,0.3); font-size: 0.75rem; letter-spacing: 2px; }
+  .site-footer .footer-links {
+    display: flex; justify-content: center; gap: 24px; margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .site-footer .footer-links a {
+    color: rgba(255,255,255,0.4); text-decoration: none; font-size: 0.8rem;
+    transition: color 0.3s;
+  }
+  .site-footer .footer-links a:hover { color: var(--neon-green); }
+
+  /* ===== TOAST ===== */
+  .toast {
+    position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-120px);
+    background: var(--glass-bg); backdrop-filter: blur(24px);
+    border: 1px solid var(--glass-border); border-radius: 14px;
+    padding: 14px 28px; color: #fff; font-weight: 700;
+    z-index: 2000; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4); font-size: 0.9rem;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast-ok { border-color: rgba(0,255,136,0.4); color: #4ade80; }
+  .toast-err { border-color: rgba(239,68,68,0.4); color: #f87171; }
+
+  /* ===== SCROLLBAR ===== */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--dark-1); }
+  ::-webkit-scrollbar-thumb { background: rgba(0,255,136,0.25); border-radius: 3px; }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 768px) {
+    .glass-card { padding: 28px 20px; border-radius: 20px; }
+    .hero h1 { font-size: 1.8rem; }
+    .section { padding: 40px 16px; }
+    .social-grid { grid-template-columns: 1fr 1fr; }
+    .feature-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LANGUAGE SWITCHER -->
+<div class="lang-switch">
+  <button class="lang-btn active" data-lang="ar" onclick="setLang('ar')">AR</button>
+  <button class="lang-btn" data-lang="fr" onclick="setLang('fr')">FR</button>
+  <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+</div>
+
+<canvas id="particles-canvas"></canvas>
+<div class="galaxy-bg"></div>
+<div class="galaxy-overlay"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<div class="main-wrap">
+
+  <!-- HERO -->
+  <section class="hero">
+    <img src="kb-logo.png" alt="Kick Booster Pro" class="hero-logo" />
+    <h1 data-i18n="title">KICK BOOSTER PRO</h1>
+    <div class="subtitle" data-i18n="subtitle">Next Generation Stream Power</div>
+    <div class="scroll-hint">
+      <span data-i18n="scroll">اكتشف المزيد</span>
+      <div class="arrow"></div>
+    </div>
+  </section>
+
+  <!-- WELCOME SECTION -->
+  <section class="section" id="welcome">
+    <div class="glass-card">
+      <div class="section-title green">
+        <div class="icon">👋</div>
+        <span data-i18n="welcome_title">مرحباً بك في عالم القوة</span>
+      </div>
+      <div class="accordion">
+        <div class="accordion-item active">
+          <div class="accordion-header" onclick="toggleAccordion(this)">
+            <h3 data-i18n="welcome_btn">🎉 أهلاً وسهلاً بك في Kick Booster Pro</h3>
+            <div class="chevron">▼</div>
+          </div>
+          <div class="accordion-body">
+            <div class="accordion-content" data-i18n="welcome_text">
+              <p>نرحب بك في <strong>Kick Booster Pro</strong> — المنصة الأقوى لدعم البثوث المباشرة على Kick! 🚀</p>
+              <p>نحن هنا لنمنحك تجربة فريدة من نوعها، حيث القوة والذكاء الاصطناعي يلتقيان ليمنحك <strong>أفضل أداء</strong> في بثوثك. سواء كنت مبتدئاً أو محترفاً، نحن نضمن لك <span class="highlight">دعماً مستمراً</span> و<span class="highlight">تفاعلاً حقيقياً</span> يرفع من قيمة محتواك.</p>
+              <p>انضم إلينا اليوم وكن جزءاً من <strong>ثورة البث المباشر</strong>! 💚</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXTENSION INFO SECTION -->
+  <section class="section" id="extension">
+    <div class="glass-card">
+      <div class="section-title blue">
+        <div class="icon">⚡</div>
+        <span data-i18n="ext_title">تعرف على الإكستنشن القوي</span>
+      </div>
+      <div class="accordion">
+        <div class="accordion-item">
+          <div class="accordion-header" onclick="toggleAccordion(this)">
+            <h3 data-i18n="ext_btn">🚀 ما هو Kick Booster Pro؟</h3>
+            <div class="chevron">▼</div>
+          </div>
+          <div class="accordion-body">
+            <div class="accordion-content" data-i18n="ext_text">
+              <p><strong>Kick Booster Pro</strong> هو إكستنشن متطور يعمل على متصفحك ليمنحك <span class="highlight">قوة خارقة</span> في بثوثك على Kick! 💪</p>
+              <div class="feature-grid">
+                <div class="feature-card">
+                  <div class="f-icon">🎯</div>
+                  <h4>فتح تلقائي للقنوات</h4>
+                  <p>يفتح قنواتك تلقائياً عند بدء البث، مما يضمن لك تواجداً فورياً ومستمراً</p>
+                </div>
+                <div class="feature-card">
+                  <div class="f-icon">💬</div>
+                  <h4>تعليق ذكي AI</h4>
+                  <p>ذكاء اصطناعي متطور يدعم جميع اللغات واللهجات العربية بشكل طبيعي</p>
+                </div>
+                <div class="feature-card">
+                  <div class="f-icon">🚀</div>
+                  <h4>أداء خفيف جداً</h4>
+                  <p>استهلاك ضئيل جداً لـ RAM، لا يؤثر على أداء جهازك أبداً</p>
+                </div>
+                <div class="feature-card">
+                  <div class="f-icon">🌍</div>
+                  <h4>دعم متعدد اللغات</h4>
+                  <p>يدعم العربية، الإنجليزية، الفرنسية، وكل اللهجات العربية</p>
+                </div>
+                <div class="feature-card">
+                  <div class="f-icon">⚡</div>
+                  <h4>شات قوي ومشاهدات أعلى</h4>
+                  <p>تفاعل حقيقي يجذب المزيد من المشاهدين ويرفع ترتيب قناتك</p>
+                </div>
+                <div class="feature-card">
+                  <div class="f-icon">🔒</div>
+                  <h4>نظام VIP حصري</h4>
+                  <p>دعم مضاعف، أولوية في الفتح، وخصومات حصرية للأعضاء المميزين</p>
+                </div>
+              </div>
+              <div class="vip-banner">
+                <h4>👑 مميزات VIP الحصرية</h4>
+                <ul>
+                  <li>دعم مستمر مضاعف طوال فترة البث</li>
+                  <li>شات أقوى ومشاهدات أعلى بكثير</li>
+                  <li>تخفيض 50% على الاشتراك بعد شهر من الالتزام بالقوانين</li>
+                  <li>قناتك دائماً في الواجهة — أول قناة تُفتح</li>
+                  <li>دخول في خانة التحقق (Verification) متى أردت</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RULES SECTION -->
+  <section class="section" id="rules">
+    <div class="glass-card">
+      <div class="section-title purple">
+        <div class="icon">📜</div>
+        <span data-i18n="rules_title">الشروط والقوانين</span>
+      </div>
+      <div class="accordion">
+        <div class="accordion-item">
+          <div class="accordion-header" onclick="toggleAccordion(this)">
+            <h3 data-i18n="rules_btn">⚠️ قوانين الاستخدام الإلزامية</h3>
+            <div class="chevron">▼</div>
+          </div>
+          <div class="accordion-body">
+            <div class="accordion-content" data-i18n="rules_text">
+              <ul>
+                <li><strong>الإشعارات:</strong> يجب على كل مستخدم الانتباه للإشعارات داخل الإكستنشن بشكل دائم</li>
+                <li><strong>الحضور الإلزامي:</strong> الحضور في وقت التحقق (Verification) <span class="highlight">إجباري</span> ولا يمكن التغاضي عنه</li>
+                <li><strong>التواصل:</strong> أي خلل يرجى الاتصال بنا فوراً عبر روابط التواصل في خانة "اتصل بنا"</li>
+                <li><strong>طلب VIP:</strong> أي طلب للانضمام إلى VIP يكون <span class="highlight">عبر Discord فقط</span></li>
+                <li><strong>مسؤولية البيانات:</strong> الفريق لا يتحمل مسؤولية أي خطأ في بيانات التسجيل. يمكنك التقدم بطلب تعديل عبر <strong>Discord فقط</strong></li>
+                <li><strong>زيارة Discord:</strong> زيارة صفحة Discord بشكل <span class="highlight">دوري إلزامي</span> للاطلاع على التحديثات</li>
+                <li><strong>برنامج الإحالة:</strong> كل مستخدم يضيف <strong>5 مستخدمين جدد حقيقيين</strong> يدخل مباشرة في خانة VIP (يجب التأكيد عبر Discord)</li>
+                <li><strong>التحديثات:</strong> أي تحديث جديد سيتم إرسال إشعار عبر الإكستنشن مباشرة</li>
+                <li><strong>الاحترام:</strong> الاحترام المتبادل <span class="highlight">واجب</span> بين جميع الأعضاء</li>
+                <li><strong>التحذيرات:</strong> أي خطأ يبدر من المستخدم أو تجاوز للقوانين يتم <strong>تحذيره 3 مرات</strong> ثم <span class="highlight">الحذف المباشر</span> بدون سابق إنذار</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT SECTION -->
+  <section class="section" id="contact">
+    <div class="glass-card">
+      <div class="section-title orange">
+        <div class="icon">🌐</div>
+        <span data-i18n="contact_title">تواصل معنا</span>
+      </div>
+      <div class="accordion">
+        <div class="accordion-item">
+          <div class="accordion-header" onclick="toggleAccordion(this)">
+            <h3 data-i18n="contact_btn">📱 تابعنا على جميع المنصات</h3>
+            <div class="chevron">▼</div>
+          </div>
+          <div class="accordion-body">
+            <div class="accordion-content">
+              <p style="margin-bottom:20px;color:rgba(255,255,255,0.6);" data-i18n="contact_desc">انضم إلى مجتمعنا وكن جزءاً من ثورة البث المباشر! 💚</p>
+              <div class="social-grid">
+                <a href="https://www.facebook.com/XenonGaiming1" target="_blank" class="social-card facebook">
+                  <div class="s-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                  </div>
+                  <div class="s-info">
+                    <h4>Facebook</h4>
+                    <span>@XenonGaiming1</span>
+                  </div>
+                </a>
+                <a href="https://discord.gg/zkdmTsW7" target="_blank" class="social-card discord">
+                  <div class="s-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+                  </div>
+                  <div class="s-info">
+                    <h4>Discord</h4>
+                    <span>انضم للمجتمع</span>
+                  </div>
+                </a>
+                <a href="https://www.youtube.com/@xenongaiming" target="_blank" class="social-card youtube">
+                  <div class="s-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                  </div>
+                  <div class="s-info">
+                    <h4>YouTube</h4>
+                    <span>@xenongaiming</span>
+                  </div>
+                </a>
+                <a href="https://kick.com/mrxenongaming" target="_blank" class="social-card kick">
+                  <div class="s-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97-.001V6.041h-2.618v2.179h-1.97v2.618h1.97v6.545h2.618V10.84h1.97V8.221z"/></svg>
+                  </div>
+                  <div class="s-info">
+                    <h4>Kick</h4>
+                    <span>@mrxenongaming</span>
+                  </div>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REGISTRATION SECTION -->
+  <section class="section" id="register">
+    <div class="glass-card">
+      <div class="section-title green">
+        <div class="icon">📝</div>
+        <span data-i18n="reg_title">سجل الآن وانطلق</span>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label data-i18n="lbl_channel">اسم القناة</label>
+          <input id="channel" type="text" placeholder="xenon" autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <label data-i18n="lbl_email">البريد الإلكتروني</label>
+          <input id="email" type="email" placeholder="your@email.com" />
+        </div>
+        <div class="form-group full">
+          <label data-i18n="lbl_discord">ديسكورد</label>
+          <input id="discord" type="text" placeholder="username#0000" />
+        </div>
+      </div>
+      <button class="neon-btn neon-btn-primary" onclick="register()" style="margin-top:20px;">
+        <span id="btnText" data-i18n="btn_register">تسجيل الآن</span>
+      </button>
+      <button class="neon-btn neon-btn-secondary" onclick="checkExisting()">
+        <span data-i18n="btn_check">فحص الحالة</span>
+      </button>
+      <div id="statusBox" class="status-box"></div>
+      <div class="download-wrap" id="downloadWrap">
+        <a href="https://www.mediafire.com/file/zjdcfsyhvckpfx0/kick-extension-pro-fixed-v4.zip/file" target="_blank">
+          <button class="download-btn">
+            <span>⬇️</span> <span data-i18n="btn_download">تحميل الإكستنشن</span>
+          </button>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="footer-links">
+      <a href="#welcome" data-i18n="f_welcome">الترحيب</a>
+      <a href="#extension" data-i18n="f_ext">الإكستنشن</a>
+      <a href="#rules" data-i18n="f_rules">القوانين</a>
+      <a href="#contact" data-i18n="f_contact">اتصل بنا</a>
+      <a href="#register" data-i18n="f_reg">التسجيل</a>
+    </div>
+    <p>Kick Booster Pro &copy; 2026 — All Rights Reserved</p>
+  </footer>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== SUPABASE =====
+const SUPABASE_URL = "https://xqwzguqbqiwaduraasjn.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhxd3pndXFicWl3YWR1cmFhc2puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5ODQzMTksImV4cCI6MjA5MzU2MDMxOX0.b5Nku_fw5xLl6UBan1Y8otwbL7j5DrAmJ6V0fSIQ3jk";
+
+// FIX: Supabase JS v2 correct initialization
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ===== TRANSLATIONS =====
+const i18n = {
+  ar: {
+    title: "KICK BOOSTER PRO", subtitle: "Next Generation Stream Power",
+    scroll: "اكتشف المزيد",
+    welcome_title: "مرحباً بك في عالم القوة",
+    welcome_btn: "🎉 أهلاً وسهلاً بك في Kick Booster Pro",
+    welcome_text: `<p>نرحب بك في <strong>Kick Booster Pro</strong> — المنصة الأقوى لدعم البثوث المباشرة على Kick! 🚀</p><p>نحن هنا لنمنحك تجربة فريدة من نوعها، حيث القوة والذكاء الاصطناعي يلتقيان ليمنحك <strong>أفضل أداء</strong> في بثوثك. سواء كنت مبتدئاً أو محترفاً، نحن نضمن لك <span class="highlight">دعماً مستمراً</span> و<span class="highlight">تفاعلاً حقيقياً</span> يرفع من قيمة محتواك.</p><p>انضم إلينا اليوم وكن جزءاً من <strong>ثورة البث المباشر</strong>! 💚</p>`,
+    ext_title: "تعرف على الإكستنشن القوي",
+    ext_btn: "🚀 ما هو Kick Booster Pro؟",
+    rules_title: "الشروط والقوانين",
+    rules_btn: "⚠️ قوانين الاستخدام الإلزامية",
+    contact_title: "تواصل معنا",
+    contact_btn: "📱 تابعنا على جميع المنصات",
+    contact_desc: "انضم إلى مجتمعنا وكن جزءاً من ثورة البث المباشر! 💚",
+    reg_title: "سجل الآن وانطلق",
+    lbl_channel: "اسم القناة", lbl_email: "البريد الإلكتروني", lbl_discord: "ديسكورد",
+    btn_register: "تسجيل الآن", btn_check: "فحص الحالة", btn_download: "تحميل الإكستنشن",
+    f_welcome: "الترحيب", f_ext: "الإكستنشن", f_rules: "القوانين", f_contact: "اتصل بنا", f_reg: "التسجيل"
+  },
+  fr: {
+    title: "KICK BOOSTER PRO", subtitle: "Puissance de Stream Nouvelle Génération",
+    scroll: "Découvrir plus",
+    welcome_title: "Bienvenue dans le monde de la puissance",
+    welcome_btn: "🎉 Bienvenue sur Kick Booster Pro",
+    welcome_text: `<p>Bienvenue sur <strong>Kick Booster Pro</strong> — la plateforme la plus puissante pour soutenir les streams en direct sur Kick! 🚀</p><p>Nous sommes ici pour vous offrir une expérience unique, où la puissance et l'intelligence artificielle se rejoignent pour vous donner <strong>la meilleure performance</strong> dans vos streams. Que vous soyez débutant ou professionnel, nous vous garantissons un <span class="highlight">support continu</span> et une <span class="highlight">interaction réelle</span> qui augmente la valeur de votre contenu.</p><p>Rejoignez-nous aujourd'hui et faites partie de la <strong>révolution du streaming</strong>! 💚</p>`,
+    ext_title: "Découvrez l'extension puissante",
+    ext_btn: "🚀 Qu'est-ce que Kick Booster Pro?",
+    rules_title: "Conditions et Règles",
+    rules_btn: "⚠️ Règles d'utilisation obligatoires",
+    contact_title: "Contactez-nous",
+    contact_btn: "📱 Suivez-nous sur toutes les plateformes",
+    contact_desc: "Rejoignez notre communauté et faites partie de la révolution du streaming! 💚",
+    reg_title: "Inscrivez-vous maintenant",
+    lbl_channel: "Nom de la chaîne", lbl_email: "Email", lbl_discord: "Discord",
+    btn_register: "S'inscrire", btn_check: "Vérifier le statut", btn_download: "Télécharger l'extension",
+    f_welcome: "Accueil", f_ext: "Extension", f_rules: "Règles", f_contact: "Contact", f_reg: "Inscription"
+  },
+  en: {
+    title: "KICK BOOSTER PRO", subtitle: "Next Generation Stream Power",
+    scroll: "Discover more",
+    welcome_title: "Welcome to the World of Power",
+    welcome_btn: "🎉 Welcome to Kick Booster Pro",
+    welcome_text: `<p>Welcome to <strong>Kick Booster Pro</strong> — the most powerful platform for supporting live streams on Kick! 🚀</p><p>We are here to give you a unique experience, where power and artificial intelligence meet to give you <strong>the best performance</strong> in your streams. Whether you are a beginner or a professional, we guarantee you <span class="highlight">continuous support</span> and <span class="highlight">real interaction</span> that increases the value of your content.</p><p>Join us today and be part of the <strong>live streaming revolution</strong>! 💚</p>`,
+    ext_title: "Discover the Powerful Extension",
+    ext_btn: "🚀 What is Kick Booster Pro?",
+    rules_title: "Terms and Rules",
+    rules_btn: "⚠️ Mandatory Usage Rules",
+    contact_title: "Contact Us",
+    contact_btn: "📱 Follow us on all platforms",
+    contact_desc: "Join our community and be part of the streaming revolution! 💚",
+    reg_title: "Register Now and Launch",
+    lbl_channel: "Channel Name", lbl_email: "Email", lbl_discord: "Discord",
+    btn_register: "Register Now", btn_check: "Check Status", btn_download: "Download Extension",
+    f_welcome: "Welcome", f_ext: "Extension", f_rules: "Rules", f_contact: "Contact", f_reg: "Register"
+  }
+};
+
+let currentLang = 'ar';
+
+function setLang(lang) {
+  currentLang = lang;
+  document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.lang === lang));
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if(i18n[lang][key]) {
+      if(key === 'welcome_text' || key === 'ext_text' || key === 'rules_text') {
+        el.innerHTML = i18n[lang][key];
+      } else {
+        el.textContent = i18n[lang][key];
+      }
+    }
+  });
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  document.body.style.fontFamily = lang === 'ar' ? "'Cairo', sans-serif" : "'Inter', sans-serif";
+}
+
+// ===== PARTICLES =====
+const canvas = document.getElementById('particles-canvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+let mouse = { x: null, y: null };
+function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+window.addEventListener('resize', resize); resize();
+class Particle {
+  constructor() { this.reset(); }
+  reset() {
+    this.x = Math.random()*canvas.width; this.y = Math.random()*canvas.height;
+    this.size = Math.random()*2+0.5; this.speed = Math.random()*0.3+0.1;
+    this.angle = Math.random()*Math.PI*2;
+    this.color = Math.random()>0.5?'rgba(0,255,136,':'rgba(0,212,255,';
+    this.opacity = Math.random()*0.4+0.1;
+  }
+  update() {
+    this.x += Math.cos(this.angle)*this.speed;
+    this.y += Math.sin(this.angle)*this.speed;
+    if(this.x<0||this.x>canvas.width||this.y<0||this.y>canvas.height) this.reset();
+  }
+  draw() {
+    ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+    ctx.fillStyle = this.color+this.opacity+')'; ctx.fill();
+  }
+}
+for(let i=0;i<80;i++) particles.push(new Particle());
+function animate() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particles.forEach(p=>{p.update();p.draw();});
+  requestAnimationFrame(animate);
+}
+animate();
+
+// ===== ACCORDION =====
+function toggleAccordion(header) {
+  const item = header.parentElement;
+  const wasActive = item.classList.contains('active');
+  document.querySelectorAll('.accordion-item').forEach(i => i.classList.remove('active'));
+  if(!wasActive) item.classList.add('active');
+}
+
+// ===== TOAST =====
+function showToast(msg, type='ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast toast-'+type+' show';
+  setTimeout(()=>t.classList.remove('show'), 3000);
+}
+
+// ===== REGISTER =====
+async function register() {
+  const channel = document.getElementById('channel').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const discord = document.getElementById('discord').value.trim();
+
+  if(!channel || !email) {
+    showToast(currentLang==='ar'?'املأ البيانات المطلوبة':currentLang==='fr'?'Remplissez les champs requis':'Fill required fields', 'err');
+    return;
+  }
+
+  const btn = document.querySelector('.neon-btn-primary');
+  btn.disabled = true;
+  document.getElementById('btnText').textContent = currentLang==='ar'?'جاري التسجيل...':currentLang==='fr'?'Inscription...':'Registering...';
+
+  try {
+    // FIX: Only send columns that exist in the table: channel, email, discord, status
+    const { error } = await client.from('channels').insert([{
+      channel: channel,
+      email: email,
+      discord: discord || "",
+      status: 'pending'
+    }]);
+
+    if(error) {
+      console.error('Supabase error:', error);
+      if(error.message && error.message.includes('duplicate')) {
+        showToast(currentLang==='ar'?'القناة مسجلة مسبقاً':currentLang==='fr'?'Chaîne déjà enregistrée':'Channel already registered', 'err');
+      } else {
+        showToast('Error: ' + error.message, 'err');
+      }
+      return;
+    }
+
+    localStorage.setItem('kb_email', email);
+    showToast(currentLang==='ar'?'تم التسجيل بنجاح!':currentLang==='fr'?'Inscription réussie!':'Registration successful!');
+    checkStatus(email);
+  } catch(err) {
+    console.error('Connection error:', err);
+    showToast('Connection error: ' + (err.message || 'Unknown'), 'err');
+  } finally {
+    btn.disabled = false;
+    document.getElementById('btnText').textContent = i18n[currentLang].btn_register;
+  }
+}
+
+async function checkStatus(email) {
+  try {
+    const { data, error } = await client.from('channels').select('status').eq('email', email).order('created_at', {ascending:false}).limit(1).maybeSingle();
+    if(error || !data) return;
+    updateUI(data.status);
+  } catch(err) {
+    console.error('Check status error:', err);
+  }
+}
+
+function updateUI(status) {
+  const box = document.getElementById('statusBox');
+  const dl = document.getElementById('downloadWrap');
+  box.style.display = 'block'; dl.style.display = 'none';
+  box.className = 'status-box';
+
+  if(status === 'pending') {
+    box.classList.add('status-pending');
+    box.innerHTML = currentLang==='ar'?'⏳ قيد المراجعة — سيتم إشعارك بالبريد':currentLang==='fr'?'⏳ En attente — vous serez notifié par email':'⏳ Pending — you will be notified by email';
+  } else if(status === 'approved') {
+    box.classList.add('status-approved');
+    box.innerHTML = currentLang==='ar'?'✅ تم القبول! يمكنك تحميل الإكستنشن':currentLang==='fr'?"✅ Approuvé! Vous pouvez télécharger l'extension":'✅ Approved! You can download the extension';
+    dl.style.display = 'block';
+  } else if(status === 'rejected') {
+    box.classList.add('status-rejected');
+    box.innerHTML = currentLang==='ar'?'❌ تم الرفض — تواصل مع الدعم':currentLang==='fr'?"❌ Refusé — contactez le support":'❌ Rejected — contact support';
+  }
+}
+
+async function checkExisting() {
+  const email = document.getElementById('email').value.trim();
+  if(!email) { showToast(currentLang==='ar'?'أدخل الإيميل أولاً':currentLang==='fr'?"Entrez l'email d'abord":'Enter email first', 'err'); return; }
+  await checkStatus(email);
+}
+
+// ===== INIT =====
+const savedEmail = localStorage.getItem('kb_email');
+if(savedEmail) { document.getElementById('email').value = savedEmail; checkStatus(savedEmail); }
+</script>
+</body>
+</html>
