@@ -894,8 +894,9 @@ function updateUI(status, email) {
     const seenKey = 'kb_seen_' + (email || localStorage.getItem('kb_email') || '');
     if (localStorage.getItem(seenKey)) {
       box.classList.add('status-approved');
-      box.innerHTML = currentLang==='ar'?'✅ تم القبول مسبقاً — يمكنك إعادة التحميل من الرابط أعلاه':currentLang==='fr'?"✅ Déjà approuvé — vous pouvez télécharger à nouveau":'✅ Already approved — you may download again';
+      box.innerHTML = currentLang==='ar'?'✅ تم القبول مسبقاً — يمكنك التحميل الآن':currentLang==='fr'?"✅ Déjà approuvé — vous pouvez télécharger maintenant":'✅ Already approved — you may download now';
       box.style.display = 'block';
+      dl.style.display = 'block';
       return;
     }
     box.classList.add('status-approved');
