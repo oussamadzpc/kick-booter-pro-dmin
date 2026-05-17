@@ -836,7 +836,7 @@ async function register() {
 
     localStorage.setItem('kb_email', email);
     showToast(currentLang==='ar'?'تم التسجيل بنجاح!':currentLang==='fr'?'Inscription réussie!':'Registration successful!');
-    checkStatus(email);
+    checkStatus(email, null);
   } catch(err) {
     console.error('Connection error:', err);
     showToast('Connection error: ' + (err.message || 'Unknown'), 'err');
@@ -846,20 +846,44 @@ async function register() {
   }
 }
 
-async function checkStatus(email) {
+async function checkStatus(email, channel) {
   try {
-    const { data, error } = await client.from('channels').select('status').eq('email', email).order('created_at', {ascending:false}).limit(1).maybeSingle();
-    if(error || !data) return;
-    updateUI(data.status, email);
+    let data = null;
+    let error = null;
+
+    if (email) {
+      const res = await client.from('channels').select('status,email').eq('email', email.toLowerCase()).order('created_at', {ascending:false}).limit(1).maybeSingle();
+      data = res.data;
+      error = res.error;
+    }
+
+    if (!data && channel) {
+      const res = await client.from('channels').select('status,email').eq('channel', channel.toLowerCase()).order('created_at', {ascending:false}).limit(1).maybeSingle();
+      data = res.data;
+      error = res.error;
+    }
+
+    if(error || !data) {
+      const box = document.getElementById('statusBox');
+      const dl = document.getElementById('downloadWrap');
+      box.style.display = 'block'; dl.style.display = 'none';
+      box.className = 'status-box status-rejected';
+      box.innerHTML = currentLang==='ar'?'❌ لم يُعثر على القناة — تأكد من البيانات':currentLang==='fr'?'❌ Chaîne non trouvée — vérifiez les données':'❌ Channel not found — check your data';
+      return;
+    }
+
+    updateUI(data.status, data.email || email);
   } catch(err) {
     console.error('Check status error:', err);
+    showToast(currentLang==='ar'?'خطأ في الاتصال':currentLang==='fr'?'Erreur de connexion':'Connection error', 'err');
   }
 }
 
 function updateUI(status, email) {
   const box = document.getElementById('statusBox');
   const dl = document.getElementById('downloadWrap');
-  box.style.display = 'none'; dl.style.display = 'none';
+  box.style.display = 'none'; 
+  dl.style.display = 'none';
   box.className = 'status-box';
 
   if(status === 'pending') {
@@ -867,10 +891,11 @@ function updateUI(status, email) {
     box.innerHTML = currentLang==='ar'?'⏳ قيد المراجعة — سيتم إشعارك بالبريد':currentLang==='fr'?'⏳ En attente — vous serez notifié par email':'⏳ Pending — you will be notified by email';
     box.style.display = 'block';
   } else if(status === 'approved') {
-    // Hide notification+download if user already clicked download or if page reloads
     const seenKey = 'kb_seen_' + (email || localStorage.getItem('kb_email') || '');
     if (localStorage.getItem(seenKey)) {
-      // Already seen/downloaded — keep hidden on reload
+      box.classList.add('status-approved');
+      box.innerHTML = currentLang==='ar'?'✅ تم القبول مسبقاً — يمكنك إعادة التحميل من الرابط أعلاه':currentLang==='fr'?"✅ Déjà approuvé — vous pouvez télécharger à nouveau":'✅ Already approved — you may download again';
+      box.style.display = 'block';
       return;
     }
     box.classList.add('status-approved');
@@ -881,13 +906,21 @@ function updateUI(status, email) {
     box.classList.add('status-rejected');
     box.innerHTML = currentLang==='ar'?'❌ تم الرفض — تواصل مع الدعم':currentLang==='fr'?"❌ Refusé — contactez le support":'❌ Rejected — contact support';
     box.style.display = 'block';
+  } else {
+    box.classList.add('status-rejected');
+    box.innerHTML = currentLang==='ar'?'❌ حالة غير معروفة':currentLang==='fr'?'❌ Statut inconnu':'❌ Unknown status';
+    box.style.display = 'block';
   }
 }
 
 async function checkExisting() {
   const email = document.getElementById('email').value.trim();
-  if(!email) { showToast(currentLang==='ar'?'أدخل الإيميل أولاً':currentLang==='fr'?"Entrez l'email d'abord":'Enter email first', 'err'); return; }
-  await checkStatus(email);
+  const channel = document.getElementById('channel').value.trim();
+  if(!email && !channel) { 
+    showToast(currentLang==='ar'?'أدخل الإيميل أو اسم القناة أولاً':currentLang==='fr'?"Entrez l'email ou le nom de chaîne d'abord":'Enter email or channel name first', 'err'); 
+    return; 
+  }
+  await checkStatus(email, channel);
 }
 
 // ===== INIT =====
@@ -899,7 +932,6 @@ function markDownloaded() {
   if (email) {
     localStorage.setItem('kb_seen_' + email, 'true');
   }
-  // Hide immediately after click
   document.getElementById('statusBox').style.display = 'none';
   document.getElementById('downloadWrap').style.display = 'none';
 }
