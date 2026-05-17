@@ -817,19 +817,19 @@ async function register() {
   document.getElementById('btnText').textContent = currentLang==='ar'?'جاري التسجيل...':currentLang==='fr'?'Inscription...':'Registering...';
 
   try {
-    const { error } = await client.from('channels').insert([{
-      channel: channel,
-      email: email,
-      discord: discord || "",
-      status: 'pending'
-    }]);
+    const response = await fetch('/api/channels/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ channel: channel.toLowerCase(), email: email.toLowerCase(), discord: discord || "" })
+    });
 
-    if(error) {
-      console.error('Supabase error:', error);
-      if(error.message && error.message.includes('duplicate')) {
-        showToast(currentLang==='ar'?'القناة مسجلة مسبقاً':currentLang==='fr'?'Chaîne déjà enregistrée':'Channel already registered', 'err');
+    const result = await response.json();
+
+    if (!response.ok) {
+      if (result.error === 'channel_exists') {
+        showToast(currentLang==='ar'?'القناة مسجلة مسبقاً — جرب اسم آخر':currentLang==='fr'?'Chaîne déjà enregistrée — essayez un autre nom':'Channel already registered — try another name', 'err');
       } else {
-        showToast('Error: ' + error.message, 'err');
+        showToast('Error: ' + (result.error || result.message || 'Unknown'), 'err');
       }
       return;
     }
